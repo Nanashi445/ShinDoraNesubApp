@@ -19,6 +19,7 @@ const Profile = () => {
   const { t, translate } = useLanguage();
   const [formData, setFormData] = useState({
     username: user?.username || '',
+    display_name: user?.display_name || '',
     avatar_url: user?.avatar_url || '',
     password: ''
   });
