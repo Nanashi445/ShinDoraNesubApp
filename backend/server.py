@@ -670,11 +670,21 @@ async def init_defaults():
     ]
     await db.pages.insert_many([p.model_dump() for p in default_pages])
     
-    # Default settings
+    # Default settings with social and support links
     default_settings = Settings(
         logo_url="https://api.dicebear.com/7.x/shapes/svg?seed=ShinDora",
         theme=Theme(),
-        ads=Ad()
+        social_links=[
+            SocialLink(name="TikTok", url="https://tiktok.com/@shindoranesub"),
+            SocialLink(name="Facebook", url="https://www.facebook.com/p/ShinDora-Nesub-61567024627372/"),
+            SocialLink(name="YouTube", url="https://www.youtube.com/channel/UCBmc1P810YLRcKimSfdtFRA")
+        ],
+        support_links=[
+            SocialLink(name="Trakteer", url="https://trakteer.id/ShinDoraNesub/tip"),
+            SocialLink(name="Saweria", url="https://saweria.co/ShinDoraNesub"),
+            SocialLink(name="Ko-fi", url="https://ko-fi.com/shindoranesub"),
+            SocialLink(name="Sociabuzz", url="https://sociabuzz.com/shindoranesub/tribe")
+        ]
     )
     await db.settings.insert_one(default_settings.model_dump())
     
