@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Switch } from '../components/ui/switch';
 import { toast } from 'sonner';
+import { Toaster } from '../components/ui/sonner';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
