@@ -31,6 +31,44 @@ const Profile = () => {
     );
   }
 
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error(t({ id: 'Ukuran file maksimal 5MB', en: 'Maximum file size is 5MB' }));
+      return;
+    }
+    
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      toast.error(t({ id: 'File harus berupa gambar', en: 'File must be an image' }));
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await axios.post(`${API}/auth/upload-avatar`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      
+      setFormData(prev => ({ ...prev, avatar_url: response.data.avatar_url }));
+      await fetchUser();
+      toast.success(t({ id: 'Avatar berhasil diupload', en: 'Avatar uploaded successfully' }));
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to upload avatar');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
