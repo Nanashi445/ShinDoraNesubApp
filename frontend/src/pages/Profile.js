@@ -15,7 +15,7 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 const Profile = () => {
   const navigate = useNavigate();
-  const { user, updateProfile } = useAuth();
+  const { user, updateProfile, token, fetchUser } = useAuth();
   const { t, translate } = useLanguage();
   const [formData, setFormData] = useState({
     username: user?.username || '',
