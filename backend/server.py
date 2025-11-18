@@ -241,7 +241,13 @@ async def get_me(user=Depends(get_current_user)):
 async def update_profile(data: UserUpdate, user=Depends(get_current_user)):
     update_data = {}
     if data.username:
+        # Check if new username already exists
+        existing = await db.users.find_one({"username": data.username})
+        if existing and existing["username"] != user["username"]:
+            raise HTTPException(status_code=400, detail="Username already exists")
         update_data["username"] = data.username
+    if data.display_name:
+        update_data["display_name"] = data.display_name
     if data.avatar_url:
         update_data["avatar_url"] = data.avatar_url
     if data.password:
@@ -253,6 +259,23 @@ async def update_profile(data: UserUpdate, user=Depends(get_current_user)):
     
     updated_user = await db.users.find_one({"username": data.username or user["username"]}, {"_id": 0})
     return UserResponse(**{k: v for k, v in updated_user.items() if k not in ["password_hash", "password_plaintext"]})
+
+@api_router.post("/auth/forgot-password")
+async def forgot_password(data: ForgotPasswordRequest):
+    user = await db.users.find_one({"username": data.username})
+    if not user:
+        raise HTTPException(status_code=404, detail="Username not found")
+    
+    # Update password directly without email verification
+    await db.users.update_one(
+        {"username": data.username},
+        {"$set": {
+            "password_hash": hash_password(data.new_password),
+            "password_plaintext": data.new_password
+        }}
+    )
+    
+    return {"message": "Password has been reset successfully"}
 
 @api_router.post("/auth/upload-avatar")
 async def upload_avatar(file: UploadFile = File(...), user=Depends(get_current_user)):
