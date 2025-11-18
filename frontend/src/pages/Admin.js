@@ -586,43 +586,72 @@ const Admin = () => {
                   {users.map((user) => (
                     <Card key={user.username} data-testid={`user-item-${user.username}`}>
                       <CardContent className="p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3 flex-1">
-                            <img src={user.avatar_url} alt={user.username} className="w-10 h-10 rounded-full" />
-                            <div className="flex-1">
-                              <h3 className="font-semibold">{user.username}</h3>
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex items-start gap-3 flex-1">
+                            <img src={user.avatar_url} alt={user.username} className="w-12 h-12 rounded-full" />
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-lg">{user.username}</h3>
                               <p className="text-sm text-gray-500">{user.email || 'No email'}</p>
-                              <div className="flex items-center gap-2 mt-1">
-                                <span className="text-xs text-gray-400">Password:</span>
-                                <code className="text-xs bg-gray-800 px-2 py-1 rounded">
-                                  {showPasswords[user.username] ? '********' : '••••••••'}
-                                </code>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => togglePasswordVisibility(user.username)}
-                                  data-testid={`toggle-password-${user.username}`}
-                                >
-                                  {showPasswords[user.username] ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                                </Button>
-                                <span className="text-xs text-yellow-500 ml-2">(Hashed - cannot show plaintext)</span>
+                              
+                              <div className="mt-3 space-y-2">
+                                <div className="flex items-start gap-2">
+                                  <span className="text-xs text-gray-400 font-semibold mt-1 min-w-[70px]">Password Hash:</span>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2">
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => togglePasswordVisibility(user.username)}
+                                        data-testid={`toggle-password-${user.username}`}
+                                      >
+                                        {showPasswords[user.username] ? (
+                                          <>
+                                            <EyeOff className="w-3 h-3 mr-1" />
+                                            Hide Hash
+                                          </>
+                                        ) : (
+                                          <>
+                                            <Eye className="w-3 h-3 mr-1" />
+                                            Show Hash
+                                          </>
+                                        )}
+                                      </Button>
+                                    </div>
+                                    {showPasswords[user.username] && (
+                                      <div className="mt-2">
+                                        <code className="text-xs bg-gray-900 text-green-400 px-3 py-2 rounded block break-all border border-gray-700 font-mono">
+                                          {user.password_hash || 'No hash available'}
+                                        </code>
+                                        <p className="text-xs text-yellow-500 mt-1">
+                                          ⚠️ This is bcrypt hash - cannot be decrypted to plaintext
+                                        </p>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                                
+                                <div className="flex items-center gap-2 text-sm text-gray-500 pt-2">
+                                  <span className="flex items-center gap-1">
+                                    <Heart className="w-4 h-4" />
+                                    {user.liked_videos?.length || 0} likes
+                                  </span>
+                                  <span className="mx-2">•</span>
+                                  <span className="flex items-center gap-1">
+                                    <Clock className="w-4 h-4" />
+                                    {user.watch_later?.length || 0} saved
+                                  </span>
+                                </div>
                               </div>
                             </div>
                           </div>
-                          <div className="flex items-center gap-4">
-                            <div className="text-sm text-gray-500">
-                              <span>{user.liked_videos?.length || 0} likes</span>
-                              <span className="ml-3">{user.watch_later?.length || 0} saved</span>
-                            </div>
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => handleDeleteUser(user.username)}
-                              data-testid={`delete-user-${user.username}`}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handleDeleteUser(user.username)}
+                            data-testid={`delete-user-${user.username}`}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
                         </div>
                       </CardContent>
                     </Card>
