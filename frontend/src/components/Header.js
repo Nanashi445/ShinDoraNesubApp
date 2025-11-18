@@ -222,6 +222,19 @@ const Header = ({ onMenuClick }) => {
                 />
               </div>
             )}
+            {authMode === 'login' && (
+              <div className="text-center">
+                <Button
+                  type="button"
+                  variant="link"
+                  onClick={() => { setShowAuth(false); setShowForgotPassword(true); }}
+                  className="text-sm"
+                  data-testid="forgot-password-link"
+                >
+                  {language === 'id' ? 'Lupa Password?' : 'Forgot Password?'}
+                </Button>
+              </div>
+            )}
             <div className="flex gap-2">
               <Button type="submit" className="flex-1" data-testid="auth-submit-btn">
                 {authMode === 'login' ? t(translate.login) : t(translate.register)}
