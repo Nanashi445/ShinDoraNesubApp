@@ -427,6 +427,23 @@ async def admin_update_page(page_name: str, page: Page, admin=Depends(get_admin)
     await db.pages.update_one({"page_name": page_name}, {"$set": page.model_dump()}, upsert=True)
     return {"success": True}
 
+@api_router.get("/admin/users")
+async def admin_get_users(admin=Depends(get_admin)):
+    users = await db.users.find({}, {"password_hash": 0, "_id": 0}).to_list(1000)
+    return users
+
+@api_router.delete("/admin/users/{username}")
+async def admin_delete_user(username: str, admin=Depends(get_admin)):
+    # Delete user
+    result = await db.users.delete_one({"username": username})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Delete user's comments
+    await db.comments.delete_many({"user_id": username})
+    
+    return {"success": True}
+
 # ===== INIT DEFAULT DATA =====
 @api_router.post("/init-defaults")
 async def init_defaults():
