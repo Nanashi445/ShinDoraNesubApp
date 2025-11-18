@@ -76,6 +76,12 @@ const PlaylistDetail = () => {
             {t({ id: 'Oleh', en: 'By' })} {playlist.user_id} • {playlist.video_ids?.length || 0} {t({ id: 'video', en: 'videos' })}
           </p>
         </div>
+        {playlist.videos && playlist.videos.length > 0 && (
+          <Button onClick={() => navigate(`/playlist/${id}/autoplay`)} data-testid="autoplay-playlist-btn">
+            <Play className="w-4 h-4 mr-2" />
+            {t({ id: 'Putar Otomatis', en: 'Autoplay' })}
+          </Button>
+        )}
       </div>
 
       {playlist.videos && playlist.videos.length > 0 ? (
