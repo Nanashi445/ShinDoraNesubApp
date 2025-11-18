@@ -96,10 +96,28 @@ const Header = ({ onMenuClick }) => {
               {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </Button>
             
-            <Button variant="ghost" size="icon" onClick={toggleLanguage} data-testid="language-toggle-btn">
-              <Globe className="w-5 h-5" />
-              <span className="ml-1 text-xs font-semibold">{language.toUpperCase()}</span>
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" data-testid="language-toggle-btn">
+                  <Globe className="w-5 h-5" />
+                  <span className="ml-1 text-xs font-semibold">{language.toUpperCase()}</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 max-h-96 overflow-y-auto">
+                {LANGUAGES.map((lang) => (
+                  <DropdownMenuItem
+                    key={lang.code}
+                    onClick={() => changeLanguage(lang.code)}
+                    className={language === lang.code ? 'bg-blue-500/20' : ''}
+                    data-testid={`lang-${lang.code}`}
+                  >
+                    <span className="mr-2">{lang.flag}</span>
+                    <span>{lang.name}</span>
+                    {language === lang.code && <span className="ml-auto">✓</span>}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             {user ? (
               <DropdownMenu>
