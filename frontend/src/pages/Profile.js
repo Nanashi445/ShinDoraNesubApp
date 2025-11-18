@@ -139,6 +139,16 @@ const Profile = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
+              <Label htmlFor="display_name">{t({ id: 'Nama Pengguna', en: 'Display Name' })}</Label>
+              <Input
+                id="display_name"
+                value={formData.display_name}
+                onChange={(e) => setFormData({ ...formData, display_name: e.target.value })}
+                data-testid="display-name-input"
+              />
+            </div>
+
+            <div>
               <Label htmlFor="username">{t(translate.username)}</Label>
               <Input
                 id="username"
@@ -146,6 +156,9 @@ const Profile = () => {
                 onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                 data-testid="username-input"
               />
+              <p className="text-xs text-gray-500 mt-1">
+                {t({ id: 'Username dapat diubah', en: 'Username can be changed' })}
+              </p>
             </div>
 
             <div>
