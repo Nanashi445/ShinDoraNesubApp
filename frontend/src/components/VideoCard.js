@@ -82,27 +82,53 @@ const VideoCard = ({ video, onLike, onWatchLater, isLiked, isInWatchLater }) => 
           <Button
             size="sm"
             variant={isLiked ? 'default' : 'outline'}
-            className="flex-1"
             onClick={(e) => {
               e.stopPropagation();
               onLike?.();
             }}
             data-testid="video-like-btn"
           >
-            <Heart className={`w-4 h-4 mr-1 ${isLiked ? 'fill-current' : ''}`} />
+            <Heart className={`w-4 h-4 ${isLiked ? 'fill-current' : ''}`} />
           </Button>
           <Button
             size="sm"
             variant={isInWatchLater ? 'default' : 'outline'}
-            className="flex-1"
             onClick={(e) => {
               e.stopPropagation();
               onWatchLater?.();
             }}
             data-testid="video-watch-later-btn"
           >
-            <Clock className="w-4 h-4 mr-1" />
+            <Clock className="w-4 h-4" />
           </Button>
+          {user && playlists.length > 0 && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={(e) => e.stopPropagation()}
+                  data-testid="add-to-playlist-btn"
+                >
+                  <List className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                {playlists.map((playlist) => (
+                  <DropdownMenuItem
+                    key={playlist.id}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAddToPlaylist(playlist.id);
+                    }}
+                    data-testid={`playlist-option-${playlist.id}`}
+                  >
+                    {playlist.name}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
       </CardContent>
     </Card>
