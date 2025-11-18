@@ -62,21 +62,37 @@ const Sidebar = ({ isOpen }) => {
           ))}
 
           <div className="pt-4 border-t border-gray-700 mt-4">
-            <div className="flex items-center gap-2 px-3 py-2 text-sm font-semibold">
+            <div className="flex items-center gap-2 px-3 py-2 text-sm font-semibold mb-3">
               <Grid3x3 className="w-4 h-4" />
               {t(translate.allCategories)}
             </div>
-            {categories.map((category) => (
-              <Button
-                key={category.id}
-                variant="ghost"
-                className="w-full justify-start pl-9"
-                onClick={() => navigate(`/?category=${encodeURIComponent(t(category.name))}`)}
-                data-testid={`category-${category.id}`}
-              >
-                {t(category.name)}
-              </Button>
-            ))}
+            <div className="grid grid-cols-2 gap-2 px-2">
+              {categories.map((category) => (
+                <div
+                  key={category.id}
+                  className="cursor-pointer rounded-lg overflow-hidden hover:opacity-80 transition-opacity"
+                  onClick={() => navigate(`/?category=${encodeURIComponent(t(category.name))}`)}
+                  data-testid={`category-${category.id}`}
+                >
+                  <div 
+                    className="aspect-square flex flex-col items-center justify-center p-3"
+                    style={{ backgroundColor: category.color || '#3B82F6' }}
+                  >
+                    {category.thumbnail_url ? (
+                      <img src={category.thumbnail_url} alt={t(category.name)} className="w-12 h-12 object-contain mb-2" />
+                    ) : (
+                      <Grid3x3 className="w-12 h-12 text-white opacity-50 mb-2" />
+                    )}
+                    <h3 className="text-xs font-semibold text-white text-center line-clamp-2">
+                      {t(category.name)}
+                    </h3>
+                    <p className="text-xs text-white opacity-75 mt-1">
+                      {category.video_count || 0} video
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </ScrollArea>
