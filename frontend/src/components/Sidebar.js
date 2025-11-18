@@ -34,7 +34,6 @@ const Sidebar = ({ isOpen }) => {
     { icon: Heart, label: translate.likedVideos, path: '/liked', testId: 'sidebar-liked' },
     { icon: List, label: { id: 'Playlist', en: 'Playlists' }, path: '/playlists', testId: 'sidebar-playlists' },
     { icon: Play, label: translate.autoplay, path: '/autoplay', testId: 'sidebar-autoplay' },
-    { icon: Grid3x3, label: translate.allCategories, path: '/categories', testId: 'sidebar-categories' },
   ];
 
   const isActive = (path) => location.pathname === path || location.search === path.split('?')[1];
