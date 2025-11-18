@@ -115,10 +115,15 @@ const VideoPlayer = () => {
     try {
       await axios.post(
         `${API}/comments`,
-        { video_id: id, comment: newComment },
+        { 
+          video_id: id, 
+          comment: newComment,
+          parent_comment_id: replyTo?.id || null
+        },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setNewComment('');
+      setReplyTo(null);
       fetchComments();
       toast.success(t({ id: 'Komentar ditambahkan', en: 'Comment added' }));
     } catch (error) {
