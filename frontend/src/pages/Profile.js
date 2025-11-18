@@ -113,8 +113,9 @@ const Profile = () => {
               <AvatarFallback>{formData.username[0]?.toUpperCase()}</AvatarFallback>
             </Avatar>
             <div className="text-center">
-              <h2 className="text-xl font-bold" data-testid="profile-username">{user.username}</h2>
-              <p className="text-sm text-gray-500" data-testid="profile-email">{user.email || 'No email'}</p>
+              <h2 className="text-xl font-bold" data-testid="profile-display-name">{user.display_name || user.username}</h2>
+              <p className="text-sm text-gray-500" data-testid="profile-username">@{user.username}</p>
+              <p className="text-xs text-gray-400" data-testid="profile-email">{user.email || 'No email'}</p>
             </div>
             <div>
               <input
