@@ -396,12 +396,99 @@ async def get_settings():
     return settings
 
 # ===== PAGES =====
+@api_router.get("/pages")
+async def get_pages():
+    pages = await db.pages.find({}, {"_id": 0}).to_list(100)
+    return pages
+
 @api_router.get("/pages/{page_name}")
 async def get_page(page_name: str):
     page = await db.pages.find_one({"page_name": page_name}, {"_id": 0})
     if not page:
         raise HTTPException(status_code=404, detail="Page not found")
     return page
+
+# ===== PLAYLISTS =====
+@api_router.get("/playlists")
+async def get_playlists(user_id: Optional[str] = None):
+    query = {}
+    if user_id:
+        query = {"$or": [{"user_id": user_id}, {"is_public": True}]}
+    else:
+        query = {"is_public": True}
+    playlists = await db.playlists.find(query, {"_id": 0}).to_list(100)
+    return playlists
+
+@api_router.get("/playlists/{playlist_id}")
+async def get_playlist(playlist_id: str):
+    playlist = await db.playlists.find_one({"id": playlist_id}, {"_id": 0})
+    if not playlist:
+        raise HTTPException(status_code=404, detail="Playlist not found")
+    
+    # Get videos in playlist
+    video_ids = playlist.get("video_ids", [])
+    videos = await db.videos.find({"id": {"$in": video_ids}}, {"_id": 0}).to_list(100)
+    playlist["videos"] = videos
+    return playlist
+
+@api_router.post("/playlists")
+async def create_playlist(data: PlaylistCreate, user=Depends(get_current_user)):
+    playlist = Playlist(
+        name=data.name,
+        description=data.description,
+        user_id=user["username"],
+        is_public=data.is_public
+    )
+    await db.playlists.insert_one(playlist.model_dump())
+    return playlist
+
+@api_router.post("/playlists/{playlist_id}/videos/{video_id}")
+async def add_video_to_playlist(playlist_id: str, video_id: str, user=Depends(get_current_user)):
+    playlist = await db.playlists.find_one({"id": playlist_id})
+    if not playlist:
+        raise HTTPException(status_code=404, detail="Playlist not found")
+    if playlist["user_id"] != user["username"]:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    await db.playlists.update_one(
+        {"id": playlist_id},
+        {"$addToSet": {"video_ids": video_id}}
+    )
+    return {"success": True}
+
+@api_router.delete("/playlists/{playlist_id}/videos/{video_id}")
+async def remove_video_from_playlist(playlist_id: str, video_id: str, user=Depends(get_current_user)):
+    playlist = await db.playlists.find_one({"id": playlist_id})
+    if not playlist:
+        raise HTTPException(status_code=404, detail="Playlist not found")
+    if playlist["user_id"] != user["username"]:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    await db.playlists.update_one(
+        {"id": playlist_id},
+        {"$pull": {"video_ids": video_id}}
+    )
+    return {"success": True}
+
+@api_router.delete("/playlists/{playlist_id}")
+async def delete_playlist(playlist_id: str, user=Depends(get_current_user)):
+    playlist = await db.playlists.find_one({"id": playlist_id})
+    if not playlist:
+        raise HTTPException(status_code=404, detail="Playlist not found")
+    if playlist["user_id"] != user["username"]:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    await db.playlists.delete_one({"id": playlist_id})
+    return {"success": True}
+
+# ===== ADS =====
+@api_router.get("/ads")
+async def get_ads(position: Optional[str] = None):
+    query = {"enabled": True}
+    if position:
+        query["position"] = position
+    ads = await db.ads.find(query, {"_id": 0}).to_list(100)
+    return ads
 
 # ===== ADMIN ROUTES =====
 @api_router.post("/admin/auth")
