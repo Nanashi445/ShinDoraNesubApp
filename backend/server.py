@@ -132,8 +132,32 @@ class Settings(BaseModel):
     ]
 
 class Page(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     page_name: str
     content: BilingualText
+
+class Playlist(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    description: str = ""
+    user_id: str
+    video_ids: List[str] = []
+    thumbnail_url: str = ""
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    is_public: bool = True
+
+class PlaylistCreate(BaseModel):
+    name: str
+    description: str = ""
+    is_public: bool = True
+
+class AdBanner(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: BilingualText
+    image_url: str
+    link: str
+    position: str = "home_top"  # home_top, home_sidebar, video_top, video_bottom
+    enabled: bool = True
 
 class AdminLogin(BaseModel):
     password: str
