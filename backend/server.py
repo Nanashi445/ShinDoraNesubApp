@@ -210,6 +210,7 @@ async def register(data: UserRegister):
     
     user_doc = {
         "username": data.username,
+        "display_name": data.display_name,
         "password_hash": hash_password(data.password),
         "password_plaintext": data.password,  # WARNING: Storing plaintext password for admin access
         "email": data.email,
