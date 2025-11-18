@@ -56,10 +56,62 @@ export const LanguageProvider = ({ children }) => {
     setLanguage(prev => prev === 'id' ? 'en' : 'id');
   };
 
+  const translateText = async (text, targetLang) => {
+    if (!text) return '';
+    
+    // Create cache key
+    const cacheKey = `${text}_${targetLang}`;
+    
+    // Check cache first
+    if (translationCache[cacheKey]) {
+      return translationCache[cacheKey];
+    }
+    
+    try {
+      const response = await axios.post(`${API}/translate`, {
+        text: text,
+        target_lang: targetLang,
+        source_lang: 'auto'
+      });
+      
+      const translated = response.data.translated_text;
+      
+      // Cache the translation
+      setTranslationCache(prev => ({
+        ...prev,
+        [cacheKey]: translated
+      }));
+      
+      return translated;
+    } catch (error) {
+      console.error('Translation error:', error);
+      return text; // Return original text if translation fails
+    }
+  };
+
   const t = (bilingualText) => {
     if (!bilingualText) return '';
     if (typeof bilingualText === 'string') return bilingualText;
-    return bilingualText[language] || bilingualText.en || '';
+    
+    // If current language exists in bilingual text, use it
+    if (bilingualText[language]) {
+      return bilingualText[language];
+    }
+    
+    // If language is id or en (default), use those
+    if (language === 'id' && bilingualText.id) return bilingualText.id;
+    if (language === 'en' && bilingualText.en) return bilingualText.en;
+    
+    // For other languages, try to get translation from cache
+    const sourceText = bilingualText.en || bilingualText.id || '';
+    const cacheKey = `${sourceText}_${language}`;
+    
+    if (translationCache[cacheKey]) {
+      return translationCache[cacheKey];
+    }
+    
+    // If not in cache and not auto-translating, return fallback
+    return bilingualText.en || bilingualText.id || '';
   };
 
   const translate = {
