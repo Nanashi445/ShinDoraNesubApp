@@ -102,6 +102,8 @@ const Home = () => {
 
   return (
     <div className="space-y-6 fade-in" data-testid="home-page">
+      <AdBanner position="home_top" />
+      
       <div className="flex gap-2 overflow-x-auto pb-2" data-testid="category-tabs">
         {categories.map((cat) => (
           <Button
