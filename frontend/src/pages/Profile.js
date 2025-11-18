@@ -114,6 +114,24 @@ const Profile = () => {
               <h2 className="text-xl font-bold" data-testid="profile-username">{user.username}</h2>
               <p className="text-sm text-gray-500" data-testid="profile-email">{user.email || 'No email'}</p>
             </div>
+            <div>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileUpload}
+                className="hidden"
+                id="avatar-upload"
+                data-testid="avatar-file-input"
+              />
+              <label htmlFor="avatar-upload">
+                <Button type="button" variant="outline" size="sm" asChild data-testid="upload-avatar-btn">
+                  <span className="cursor-pointer">
+                    <Upload className="w-4 h-4 mr-2" />
+                    {t({ id: 'Upload Foto', en: 'Upload Photo' })}
+                  </span>
+                </Button>
+              </label>
+            </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
