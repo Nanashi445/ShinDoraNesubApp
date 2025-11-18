@@ -4,6 +4,7 @@ import axios from 'axios';
 import { Heart, Clock, Eye, ArrowLeft, Reply, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import AdBanner from '../components/AdBanner';
 import { Button } from '../components/ui/button';
 import { Textarea } from '../components/ui/textarea';
 import { Avatar, AvatarImage, AvatarFallback } from '../components/ui/avatar';
