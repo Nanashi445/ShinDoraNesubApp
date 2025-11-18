@@ -1,18 +1,20 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useTheme } from '../contexts/ThemeContext';
 
 const Footer = () => {
   const navigate = useNavigate();
   const { t, translate } = useLanguage();
+  const { settings } = useTheme();
 
-  const socialLinks = [
+  const socialLinks = settings?.social_links || [
     { name: 'TikTok', url: 'https://tiktok.com/@shindoranesub' },
     { name: 'Facebook', url: 'https://www.facebook.com/p/ShinDora-Nesub-61567024627372/' },
     { name: 'YouTube', url: 'https://www.youtube.com/channel/UCBmc1P810YLRcKimSfdtFRA' },
   ];
 
-  const supportLinks = [
+  const supportLinks = settings?.support_links || [
     { name: 'Trakteer', url: 'https://trakteer.id/ShinDoraNesub/tip' },
     { name: 'Saweria', url: 'https://saweria.co/ShinDoraNesub' },
     { name: 'Ko-fi', url: 'https://ko-fi.com/shindoranesub' },
