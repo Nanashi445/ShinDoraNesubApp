@@ -612,12 +612,28 @@ async def init_defaults():
     if existing_categories > 0:
         return {"message": "Already initialized"}
     
-    # Default categories
+    # Default categories with colors
     default_categories = [
-        Category(name=BilingualText(id="Doraemon", en="Doraemon")),
-        Category(name=BilingualText(id="Crayon Shin-chan", en="Crayon Shin-chan")),
-        Category(name=BilingualText(id="Ninja Hattori-kun", en="Ninja Hattori-kun")),
-        Category(name=BilingualText(id="Chibi Maruko-chan", en="Chibi Maruko-chan"))
+        Category(
+            name=BilingualText(id="Doraemon", en="Doraemon"),
+            color="#3B82F6",
+            thumbnail_url="https://api.dicebear.com/7.x/shapes/svg?seed=Doraemon"
+        ),
+        Category(
+            name=BilingualText(id="Crayon Shin-chan", en="Crayon Shin-chan"),
+            color="#EF4444",
+            thumbnail_url="https://api.dicebear.com/7.x/shapes/svg?seed=Shinchan"
+        ),
+        Category(
+            name=BilingualText(id="Ninja Hattori-kun", en="Ninja Hattori-kun"),
+            color="#10B981",
+            thumbnail_url="https://api.dicebear.com/7.x/shapes/svg?seed=Hattori"
+        ),
+        Category(
+            name=BilingualText(id="Chibi Maruko-chan", en="Chibi Maruko-chan"),
+            color="#F59E0B",
+            thumbnail_url="https://api.dicebear.com/7.x/shapes/svg?seed=Maruko"
+        )
     ]
     await db.categories.insert_many([c.model_dump() for c in default_categories])
     
