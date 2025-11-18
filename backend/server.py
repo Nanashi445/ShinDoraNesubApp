@@ -281,9 +281,18 @@ async def create_comment(data: CommentCreate, user=Depends(get_current_user)):
         user_id=user["username"],
         username=user["username"],
         avatar=user["avatar_url"],
-        comment=data.comment
+        comment=data.comment,
+        parent_comment_id=data.parent_comment_id
     )
     await db.comments.insert_one(comment.model_dump())
+    
+    # If this is a reply, update parent comment's replies list
+    if data.parent_comment_id:
+        await db.comments.update_one(
+            {"id": data.parent_comment_id},
+            {"$addToSet": {"replies": comment.id}}
+        )
+    
     return comment
 
 @api_router.delete("/comments/{comment_id}")
