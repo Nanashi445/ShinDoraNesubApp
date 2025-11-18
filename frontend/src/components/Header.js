@@ -26,7 +26,9 @@ const Header = ({ onMenuClick }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showAuth, setShowAuth] = useState(false);
   const [authMode, setAuthMode] = useState('login');
-  const [authData, setAuthData] = useState({ username: '', password: '', email: '' });
+  const [authData, setAuthData] = useState({ username: '', display_name: '', password: '', email: '' });
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotPasswordData, setForgotPasswordData] = useState({ username: '', new_password: '' });
 
   const handleSearch = (e) => {
     e.preventDefault();
