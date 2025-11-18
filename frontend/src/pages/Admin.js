@@ -22,6 +22,7 @@ const Admin = () => {
   const [categories, setCategories] = useState([]);
   const [settings, setSettings] = useState(null);
   const [pages, setPages] = useState({});
+  const [users, setUsers] = useState([]);
   const [editingVideo, setEditingVideo] = useState(null);
   const [showVideoDialog, setShowVideoDialog] = useState(false);
 
