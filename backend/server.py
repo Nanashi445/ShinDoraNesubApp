@@ -520,10 +520,16 @@ async def admin_update_settings(settings: Settings, admin=Depends(get_admin)):
     await db.settings.update_one({}, {"$set": settings.model_dump()}, upsert=True)
     return {"success": True}
 
+@api_router.get("/admin/categories")
+async def admin_get_categories(admin=Depends(get_admin)):
+    categories = await db.categories.find({}, {"_id": 0}).to_list(100)
+    return categories
+
 @api_router.post("/admin/categories")
 async def admin_create_category(category: Category, admin=Depends(get_admin)):
-    await db.categories.insert_one(category.model_dump())
-    return category
+    new_category = Category(**category.model_dump())
+    await db.categories.insert_one(new_category.model_dump())
+    return new_category
 
 @api_router.put("/admin/categories/{category_id}")
 async def admin_update_category(category_id: str, category: Category, admin=Depends(get_admin)):
