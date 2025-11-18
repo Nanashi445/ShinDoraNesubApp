@@ -21,7 +21,7 @@ import { toast } from 'sonner';
 const Header = ({ onMenuClick }) => {
   const navigate = useNavigate();
   const { theme, toggleTheme, settings } = useTheme();
-  const { language, toggleLanguage, translate, t } = useLanguage();
+  const { language, changeLanguage, translate, t, availableLanguages } = useLanguage();
   const { user, login, register, logout } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [showAuth, setShowAuth] = useState(false);
