@@ -14,6 +14,7 @@ import LikedVideos from './pages/LikedVideos';
 import Categories from './pages/Categories';
 import Playlists from './pages/Playlists';
 import PlaylistDetail from './pages/PlaylistDetail';
+import PlaylistAutoplay from './pages/PlaylistAutoplay';
 import Admin from './pages/Admin';
 import InfoPage from './pages/InfoPage';
 import { LanguageProvider } from './contexts/LanguageContext';
