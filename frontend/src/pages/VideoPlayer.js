@@ -225,8 +225,24 @@ const VideoPlayer = () => {
 
             {user && (
               <form onSubmit={handleAddComment} className="space-y-2" data-testid="comment-form">
+                {replyTo && (
+                  <div className="flex items-center justify-between p-2 bg-blue-500/10 rounded">
+                    <span className="text-sm">
+                      {t({ id: 'Membalas', en: 'Replying to' })} <strong>@{replyTo.username}</strong>
+                    </span>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setReplyTo(null)}
+                      data-testid="cancel-reply-btn"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                )}
                 <Textarea
-                  placeholder={t(translate.addComment)}
+                  placeholder={replyTo ? t({ id: 'Tulis balasan...', en: 'Write a reply...' }) : t(translate.addComment)}
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
                   data-testid="comment-input"
@@ -243,35 +259,86 @@ const VideoPlayer = () => {
                   {t(translate.noComments)}
                 </p>
               ) : (
-                comments.map((comment) => (
-                  <div key={comment.id} className="flex gap-3" data-testid={`comment-${comment.id}`}>
-                    <Avatar className="w-10 h-10">
-                      <AvatarImage src={comment.avatar} />
-                      <AvatarFallback>{comment.username[0].toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <span className="font-semibold text-sm">{comment.username}</span>
-                          <span className="text-xs text-gray-500 ml-2">
-                            {format(new Date(comment.created_at), 'PPp', {
-                              locale: language === 'id' ? localeId : localeEn
-                            })}
-                          </span>
+                comments.filter(c => !c.parent_comment_id).map((comment) => (
+                  <div key={comment.id} data-testid={`comment-${comment.id}`}>
+                    <div className="flex gap-3">
+                      <Avatar className="w-10 h-10">
+                        <AvatarImage src={comment.avatar} />
+                        <AvatarFallback>{comment.username[0].toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <span className="font-semibold text-sm">{comment.username}</span>
+                            <span className="text-xs text-gray-500 ml-2">
+                              {format(new Date(comment.created_at), 'PPp', {
+                                locale: language === 'id' ? localeId : localeEn
+                              })}
+                            </span>
+                          </div>
+                          <div className="flex gap-2">
+                            {user && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => setReplyTo(comment)}
+                                data-testid={`reply-comment-${comment.id}`}
+                              >
+                                <Reply className="w-4 h-4" />
+                              </Button>
+                            )}
+                            {user?.username === comment.user_id && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleDeleteComment(comment.id)}
+                                data-testid={`delete-comment-${comment.id}`}
+                              >
+                                {t(translate.delete)}
+                              </Button>
+                            )}
+                          </div>
                         </div>
-                        {user?.username === comment.user_id && (
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleDeleteComment(comment.id)}
-                            data-testid={`delete-comment-${comment.id}`}
-                          >
-                            {t(translate.delete)}
-                          </Button>
-                        )}
+                        <p className="text-sm mt-1">{comment.comment}</p>
                       </div>
-                      <p className="text-sm mt-1">{comment.comment}</p>
                     </div>
+                    
+                    {/* Replies */}
+                    {comment.replies && comment.replies.length > 0 && (
+                      <div className="ml-14 mt-3 space-y-3" data-testid={`replies-${comment.id}`}>
+                        {comments.filter(c => c.parent_comment_id === comment.id).map((reply) => (
+                          <div key={reply.id} className="flex gap-3" data-testid={`reply-${reply.id}`}>
+                            <Avatar className="w-8 h-8">
+                              <AvatarImage src={reply.avatar} />
+                              <AvatarFallback>{reply.username[0].toUpperCase()}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <span className="font-semibold text-sm">{reply.username}</span>
+                                  <span className="text-xs text-gray-500 ml-2">
+                                    {format(new Date(reply.created_at), 'PPp', {
+                                      locale: language === 'id' ? localeId : localeEn
+                                    })}
+                                  </span>
+                                </div>
+                                {user?.username === reply.user_id && (
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => handleDeleteComment(reply.id)}
+                                    data-testid={`delete-reply-${reply.id}`}
+                                  >
+                                    {t(translate.delete)}
+                                  </Button>
+                                )}
+                              </div>
+                              <p className="text-sm mt-1">{reply.comment}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ))
               )}
