@@ -42,15 +42,31 @@ const Header = ({ onMenuClick }) => {
     try {
       if (authMode === 'login') {
         await login(authData.username, authData.password);
-        toast.success(language === 'id' ? 'Login berhasil!' : 'Login successful!');
+        toast.success(language === 'id' ? 'Login berhasil!' : 'Login successful!')
       } else {
-        await register(authData.username, authData.password, authData.email);
+        if (!authData.display_name) {
+          toast.error(language === 'id' ? 'Nama pengguna wajib diisi' : 'Display name is required');
+          return;
+        }
+        await register(authData.username, authData.display_name, authData.password, authData.email);
         toast.success(language === 'id' ? 'Registrasi berhasil!' : 'Registration successful!');
       }
       setShowAuth(false);
-      setAuthData({ username: '', password: '', email: '' });
+      setAuthData({ username: '', display_name: '', password: '', email: '' });
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Authentication failed');
+    }
+  };
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post(`${API}/auth/forgot-password`, forgotPasswordData);
+      toast.success(language === 'id' ? 'Password berhasil direset!' : 'Password has been reset!');
+      setShowForgotPassword(false);
+      setForgotPasswordData({ username: '', new_password: '' });
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to reset password');
     }
   };
 
