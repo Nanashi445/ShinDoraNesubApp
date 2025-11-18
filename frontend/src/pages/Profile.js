@@ -80,6 +80,7 @@ const Profile = () => {
     try {
       const updateData = {
         username: formData.username !== user.username ? formData.username : undefined,
+        display_name: formData.display_name !== user.display_name ? formData.display_name : undefined,
         avatar_url: formData.avatar_url !== user.avatar_url ? formData.avatar_url : undefined,
         password: formData.password || undefined
       };
