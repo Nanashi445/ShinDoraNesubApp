@@ -143,6 +143,29 @@ const Admin = () => {
   const handleSettingsUpdate = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
+    
+    // Parse social links
+    const social_links = [];
+    let socialIndex = 0;
+    while (formData.get(`social_name_${socialIndex}`)) {
+      social_links.push({
+        name: formData.get(`social_name_${socialIndex}`),
+        url: formData.get(`social_url_${socialIndex}`)
+      });
+      socialIndex++;
+    }
+    
+    // Parse support links
+    const support_links = [];
+    let supportIndex = 0;
+    while (formData.get(`support_name_${supportIndex}`)) {
+      support_links.push({
+        name: formData.get(`support_name_${supportIndex}`),
+        url: formData.get(`support_url_${supportIndex}`)
+      });
+      supportIndex++;
+    }
+    
     const settingsData = {
       logo_url: formData.get('logo_url'),
       theme: {
@@ -158,7 +181,9 @@ const Admin = () => {
           id: formData.get('ads_title_id'),
           en: formData.get('ads_title_en')
         }
-      }
+      },
+      social_links,
+      support_links
     };
 
     try {
@@ -169,6 +194,19 @@ const Admin = () => {
       fetchData();
     } catch (error) {
       toast.error('Failed to update settings');
+    }
+  };
+
+  const handleDeleteUser = async (username) => {
+    if (!window.confirm(`Are you sure you want to delete user "${username}"?`)) return;
+    try {
+      await axios.delete(`${API}/admin/users/${username}`, {
+        headers: { Authorization: `Bearer ${adminToken}` }
+      });
+      toast.success('User deleted successfully');
+      fetchData();
+    } catch (error) {
+      toast.error('Failed to delete user');
     }
   };
 
