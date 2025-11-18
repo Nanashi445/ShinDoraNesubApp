@@ -35,6 +35,9 @@ function App() {
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/watch-later" element={<WatchLater />} />
                   <Route path="/liked" element={<LikedVideos />} />
+                  <Route path="/categories" element={<Categories />} />
+                  <Route path="/playlists" element={<Playlists />} />
+                  <Route path="/playlist/:id" element={<PlaylistDetail />} />
                   <Route path="/about" element={<InfoPage page="about" />} />
                   <Route path="/disclaimer" element={<InfoPage page="disclaimer" />} />
                   <Route path="/privacy" element={<InfoPage page="privacy" />} />
