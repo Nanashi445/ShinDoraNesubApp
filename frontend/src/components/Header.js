@@ -251,6 +251,50 @@ const Header = ({ onMenuClick }) => {
           </form>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={showForgotPassword} onOpenChange={setShowForgotPassword}>
+        <DialogContent data-testid="forgot-password-dialog">
+          <DialogHeader>
+            <DialogTitle>{language === 'id' ? 'Reset Password' : 'Reset Password'}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleForgotPassword} className="space-y-4">
+            <div>
+              <Label htmlFor="forgot-username">{t(translate.username)}</Label>
+              <Input
+                id="forgot-username"
+                value={forgotPasswordData.username}
+                onChange={(e) => setForgotPasswordData({ ...forgotPasswordData, username: e.target.value })}
+                required
+                data-testid="forgot-username-input"
+              />
+            </div>
+            <div>
+              <Label htmlFor="new-password">{language === 'id' ? 'Password Baru' : 'New Password'}</Label>
+              <Input
+                id="new-password"
+                type="password"
+                value={forgotPasswordData.new_password}
+                onChange={(e) => setForgotPasswordData({ ...forgotPasswordData, new_password: e.target.value })}
+                required
+                data-testid="forgot-new-password-input"
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button type="submit" className="flex-1" data-testid="forgot-password-submit-btn">
+                {language === 'id' ? 'Reset Password' : 'Reset Password'}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => { setShowForgotPassword(false); setShowAuth(true); }}
+                data-testid="back-to-login-btn"
+              >
+                {language === 'id' ? 'Kembali ke Login' : 'Back to Login'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
