@@ -22,6 +22,7 @@ const VideoPlayer = () => {
   const [video, setVideo] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
+  const [replyTo, setReplyTo] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
