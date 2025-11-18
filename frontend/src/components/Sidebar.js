@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, TrendingUp, Clock, Heart, Play, Grid3x3 } from 'lucide-react';
+import { Home, TrendingUp, Clock, Heart, Play, Grid3x3, List } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Button } from './ui/button';
 import { ScrollArea } from './ui/scroll-area';
