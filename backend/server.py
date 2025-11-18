@@ -375,6 +375,15 @@ async def get_liked_videos(user=Depends(get_current_user)):
 @api_router.get("/categories")
 async def get_categories():
     categories = await db.categories.find({}, {"_id": 0}).to_list(100)
+    # Update video count for each category
+    for category in categories:
+        count = await db.videos.count_documents({
+            "$or": [
+                {"category.id": category["name"]["id"]},
+                {"category.en": category["name"]["en"]}
+            ]
+        })
+        category["video_count"] = count
     return categories
 
 # ===== SETTINGS =====
