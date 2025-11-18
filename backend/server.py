@@ -496,6 +496,20 @@ async def get_ads(position: Optional[str] = None):
     ads = await db.ads.find(query, {"_id": 0}).to_list(100)
     return ads
 
+# ===== TRANSLATION =====
+class TranslateRequest(BaseModel):
+    text: str
+    target_lang: str
+    source_lang: str = "auto"
+
+@api_router.post("/translate")
+async def translate_text(data: TranslateRequest):
+    try:
+        result = translator.translate(data.text, src=data.source_lang, dest=data.target_lang)
+        return {"translated_text": result.text, "source_lang": result.src, "target_lang": data.target_lang}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 # ===== ADMIN ROUTES =====
 @api_router.post("/admin/auth")
 async def admin_login(data: AdminLogin):
