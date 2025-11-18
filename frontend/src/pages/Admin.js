@@ -35,14 +35,18 @@ const Admin = () => {
 
   const fetchData = async () => {
     try {
-      const [videosRes, categoriesRes, settingsRes] = await Promise.all([
+      const [videosRes, categoriesRes, settingsRes, usersRes] = await Promise.all([
         axios.get(`${API}/videos`),
         axios.get(`${API}/categories`),
-        axios.get(`${API}/settings`)
+        axios.get(`${API}/settings`),
+        axios.get(`${API}/admin/users`, {
+          headers: { Authorization: `Bearer ${adminToken}` }
+        })
       ]);
       setVideos(videosRes.data);
       setCategories(categoriesRes.data);
       setSettings(settingsRes.data);
+      setUsers(usersRes.data);
 
       // Fetch pages
       const pageNames = ['about', 'disclaimer', 'privacy', 'terms'];
