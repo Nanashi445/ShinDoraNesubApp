@@ -96,6 +96,9 @@ class CommentCreate(BaseModel):
 class Category(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: BilingualText
+    thumbnail_url: str = ""
+    color: str = "#3B82F6"
+    video_count: int = 0
 
 class Theme(BaseModel):
     primaryColor: str = "#3B82F6"
