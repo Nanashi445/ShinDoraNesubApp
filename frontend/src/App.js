@@ -39,6 +39,7 @@ function App() {
                   <Route path="/categories" element={<Categories />} />
                   <Route path="/playlists" element={<Playlists />} />
                   <Route path="/playlist/:id" element={<PlaylistDetail />} />
+                  <Route path="/playlist/:id/autoplay" element={<PlaylistAutoplay />} />
                   <Route path="/about" element={<InfoPage page="about" />} />
                   <Route path="/disclaimer" element={<InfoPage page="disclaimer" />} />
                   <Route path="/privacy" element={<InfoPage page="privacy" />} />
