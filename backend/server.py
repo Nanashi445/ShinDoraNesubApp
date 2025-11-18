@@ -223,6 +223,24 @@ async def update_profile(data: UserUpdate, user=Depends(get_current_user)):
     updated_user = await db.users.find_one({"username": data.username or user["username"]}, {"_id": 0})
     return UserResponse(**{k: v for k, v in updated_user.items() if k != "password_hash"})
 
+@api_router.post("/auth/upload-avatar")
+async def upload_avatar(file: UploadFile = File(...), user=Depends(get_current_user)):
+    try:
+        # Read file and convert to base64
+        contents = await file.read()
+        base64_image = base64.b64encode(contents).decode('utf-8')
+        data_url = f"data:{file.content_type};base64,{base64_image}"
+        
+        # Update user avatar
+        await db.users.update_one(
+            {"username": user["username"]},
+            {"$set": {"avatar_url": data_url}}
+        )
+        
+        return {"avatar_url": data_url}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 # ===== VIDEO ROUTES =====
 @api_router.get("/videos")
 async def get_videos(category: Optional[str] = None, search: Optional[str] = None):
