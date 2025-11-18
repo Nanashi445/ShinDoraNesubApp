@@ -331,13 +331,52 @@ const Admin = () => {
             </div>
           </TabsContent>
 
+          <TabsContent value="users">
+            <Card>
+              <CardHeader>
+                <CardTitle>Manage Users</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {users.map((user) => (
+                    <Card key={user.username} data-testid={`user-item-${user.username}`}>
+                      <CardContent className="p-4 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <img src={user.avatar_url} alt={user.username} className="w-10 h-10 rounded-full" />
+                          <div>
+                            <h3 className="font-semibold">{user.username}</h3>
+                            <p className="text-sm text-gray-500">{user.email || 'No email'}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <div className="text-sm text-gray-500">
+                            <span>{user.liked_videos?.length || 0} likes</span>
+                            <span className="ml-3">{user.watch_later?.length || 0} saved</span>
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handleDeleteUser(user.username)}
+                            data-testid={`delete-user-${user.username}`}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           <TabsContent value="settings">
             <Card>
               <CardHeader>
                 <CardTitle>Site Settings</CardTitle>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleSettingsUpdate} className="space-y-4">
+                <form onSubmit={handleSettingsUpdate} className="space-y-6">
                   <div>
                     <Label htmlFor="logo_url">Logo URL</Label>
                     <Input
@@ -348,52 +387,99 @@ const Admin = () => {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="primaryColor">Primary Color</Label>
-                      <Input
-                        id="primaryColor"
-                        name="primaryColor"
-                        type="color"
-                        defaultValue={settings?.theme?.primaryColor}
-                        data-testid="primary-color-input"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="darkBg">Dark Background</Label>
-                      <Input
-                        id="darkBg"
-                        name="darkBg"
-                        type="color"
-                        defaultValue={settings?.theme?.darkBg}
-                        data-testid="dark-bg-input"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="lightBg">Light Background</Label>
-                      <Input
-                        id="lightBg"
-                        name="lightBg"
-                        type="color"
-                        defaultValue={settings?.theme?.lightBg}
-                        data-testid="light-bg-input"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="textColor">Text Color</Label>
-                      <Input
-                        id="textColor"
-                        name="textColor"
-                        type="color"
-                        defaultValue={settings?.theme?.textColor}
-                        data-testid="text-color-input"
-                      />
+                  <div className="border-t pt-4">
+                    <h3 className="font-semibold mb-4">Theme Colors</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="primaryColor">Primary Color</Label>
+                        <Input
+                          id="primaryColor"
+                          name="primaryColor"
+                          type="color"
+                          defaultValue={settings?.theme?.primaryColor}
+                          data-testid="primary-color-input"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="darkBg">Dark Background</Label>
+                        <Input
+                          id="darkBg"
+                          name="darkBg"
+                          type="color"
+                          defaultValue={settings?.theme?.darkBg}
+                          data-testid="dark-bg-input"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="lightBg">Light Background</Label>
+                        <Input
+                          id="lightBg"
+                          name="lightBg"
+                          type="color"
+                          defaultValue={settings?.theme?.lightBg}
+                          data-testid="light-bg-input"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="textColor">Text Color</Label>
+                        <Input
+                          id="textColor"
+                          name="textColor"
+                          type="color"
+                          defaultValue={settings?.theme?.textColor}
+                          data-testid="text-color-input"
+                        />
+                      </div>
                     </div>
                   </div>
 
                   <div className="border-t pt-4">
-                    <h3 className="font-semibold mb-2">Advertisement</h3>
-                    <div className="space-y-2">
+                    <h3 className="font-semibold mb-4">Social Links (Ikuti ShinDoraNesub)</h3>
+                    <div className="space-y-3">
+                      {settings?.social_links?.map((link, index) => (
+                        <div key={index} className="grid grid-cols-2 gap-2">
+                          <Input
+                            name={`social_name_${index}`}
+                            placeholder="Name"
+                            defaultValue={link.name}
+                            data-testid={`social-name-${index}`}
+                          />
+                          <Input
+                            name={`social_url_${index}`}
+                            placeholder="URL"
+                            defaultValue={link.url}
+                            data-testid={`social-url-${index}`}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="border-t pt-4">
+                    <h3 className="font-semibold mb-4">Support Links (Dukung Kami)</h3>
+                    <div className="space-y-3">
+                      {settings?.support_links?.map((link, index) => (
+                        <div key={index} className="grid grid-cols-2 gap-2">
+                          <Input
+                            name={`support_name_${index}`}
+                            placeholder="Name"
+                            defaultValue={link.name}
+                            data-testid={`support-name-${index}`}
+                          />
+                          <Input
+                            name={`support_url_${index}`}
+                            placeholder="URL"
+                            defaultValue={link.url}
+                            data-testid={`support-url-${index}`}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="border-t pt-4">
+                    <h3 className="font-semibold mb-4">Advertisement</h3>
+                    <div className="space-y-3">
                       <div>
                         <Label htmlFor="ads_image">Ad Image URL</Label>
                         <Input
