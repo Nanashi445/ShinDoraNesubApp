@@ -19,6 +19,36 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const VideoCard = ({ video, onLike, onWatchLater, isLiked, isInWatchLater }) => {
   const navigate = useNavigate();
   const { t, translate } = useLanguage();
+  const { user, token } = useAuth();
+  const [playlists, setPlaylists] = useState([]);
+
+  useEffect(() => {
+    if (user) {
+      fetchPlaylists();
+    }
+  }, [user]);
+
+  const fetchPlaylists = async () => {
+    try {
+      const response = await axios.get(`${API}/playlists?user_id=${user.username}`);
+      setPlaylists(response.data.filter(p => p.user_id === user.username));
+    } catch (error) {
+      console.error('Failed to fetch playlists:', error);
+    }
+  };
+
+  const handleAddToPlaylist = async (playlistId) => {
+    try {
+      await axios.post(
+        `${API}/playlists/${playlistId}/videos/${video.id}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success(t({ id: 'Ditambahkan ke playlist', en: 'Added to playlist' }));
+    } catch (error) {
+      toast.error('Failed to add to playlist');
+    }
+  };
 
   return (
     <Card className="video-card overflow-hidden cursor-pointer group" data-testid={`video-card-${video.id}`}>
