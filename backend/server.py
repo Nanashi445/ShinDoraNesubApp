@@ -53,6 +53,7 @@ class UserLogin(BaseModel):
 
 class UserResponse(BaseModel):
     username: str
+    display_name: str
     email: Optional[str]
     avatar_url: str
     watch_later: List[str] = []
@@ -60,8 +61,13 @@ class UserResponse(BaseModel):
 
 class UserUpdate(BaseModel):
     username: Optional[str] = None
+    display_name: Optional[str] = None
     avatar_url: Optional[str] = None
     password: Optional[str] = None
+
+class ForgotPasswordRequest(BaseModel):
+    username: str
+    new_password: str = Field(..., min_length=6)
 
 class Video(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
