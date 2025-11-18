@@ -168,6 +168,8 @@ const VideoPlayer = () => {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 fade-in" data-testid="video-player-page">
+      <AdBanner position="video_top" />
+      
       <div className="aspect-video rounded-lg overflow-hidden bg-black" data-testid="video-player">
         <iframe
           src={video.embed_url}
