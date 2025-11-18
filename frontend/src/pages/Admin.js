@@ -285,8 +285,9 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="videos" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="videos" data-testid="videos-tab">Videos</TabsTrigger>
+            <TabsTrigger value="users" data-testid="users-tab">Users</TabsTrigger>
             <TabsTrigger value="categories" data-testid="categories-tab">Categories</TabsTrigger>
             <TabsTrigger value="settings" data-testid="settings-tab">Settings</TabsTrigger>
             <TabsTrigger value="pages" data-testid="pages-tab">Pages</TabsTrigger>
