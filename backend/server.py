@@ -143,6 +143,17 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
+async def get_admin(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    try:
+        token = credentials.credentials
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        role = payload.get("role")
+        if role != "admin":
+            raise HTTPException(status_code=403, detail="Admin only")
+        return payload
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
 # ===== AUTH ROUTES =====
 @api_router.post("/auth/register")
 async def register(data: UserRegister):
