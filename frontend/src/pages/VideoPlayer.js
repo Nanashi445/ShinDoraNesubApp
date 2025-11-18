@@ -37,7 +37,10 @@ const VideoPlayer = () => {
     fetchVideo();
     fetchComments();
     incrementView();
-  }, [id]);
+    if (user) {
+      fetchPlaylists();
+    }
+  }, [id, user]);
 
   const fetchVideo = async () => {
     try {
