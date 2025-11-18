@@ -118,18 +118,8 @@ class SocialLink(BaseModel):
 class Settings(BaseModel):
     logo_url: str = ""
     theme: Theme = Theme()
-    ads: Ad = Ad()
-    social_links: List[SocialLink] = [
-        SocialLink(name="TikTok", url="https://tiktok.com/@shindoranesub"),
-        SocialLink(name="Facebook", url="https://www.facebook.com/p/ShinDora-Nesub-61567024627372/"),
-        SocialLink(name="YouTube", url="https://www.youtube.com/channel/UCBmc1P810YLRcKimSfdtFRA")
-    ]
-    support_links: List[SocialLink] = [
-        SocialLink(name="Trakteer", url="https://trakteer.id/ShinDoraNesub/tip"),
-        SocialLink(name="Saweria", url="https://saweria.co/ShinDoraNesub"),
-        SocialLink(name="Ko-fi", url="https://ko-fi.com/shindoranesub"),
-        SocialLink(name="Sociabuzz", url="https://sociabuzz.com/shindoranesub/tribe")
-    ]
+    social_links: List[SocialLink] = []
+    support_links: List[SocialLink] = []
 
 class Page(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
