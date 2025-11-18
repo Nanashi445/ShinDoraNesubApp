@@ -541,9 +541,50 @@ async def admin_delete_category(category_id: str, admin=Depends(get_admin)):
     await db.categories.delete_one({"id": category_id})
     return {"success": True}
 
+@api_router.post("/admin/pages")
+async def admin_create_page(page: Page, admin=Depends(get_admin)):
+    await db.pages.insert_one(page.model_dump())
+    return page
+
 @api_router.put("/admin/pages/{page_name}")
 async def admin_update_page(page_name: str, page: Page, admin=Depends(get_admin)):
     await db.pages.update_one({"page_name": page_name}, {"$set": page.model_dump()}, upsert=True)
+    return {"success": True}
+
+@api_router.delete("/admin/pages/{page_name}")
+async def admin_delete_page(page_name: str, admin=Depends(get_admin)):
+    await db.pages.delete_one({"page_name": page_name})
+    return {"success": True}
+
+@api_router.get("/admin/playlists")
+async def admin_get_playlists(admin=Depends(get_admin)):
+    playlists = await db.playlists.find({}, {"_id": 0}).to_list(100)
+    return playlists
+
+@api_router.delete("/admin/playlists/{playlist_id}")
+async def admin_delete_playlist(playlist_id: str, admin=Depends(get_admin)):
+    await db.playlists.delete_one({"id": playlist_id})
+    return {"success": True}
+
+@api_router.get("/admin/ads")
+async def admin_get_ads(admin=Depends(get_admin)):
+    ads = await db.ads.find({}, {"_id": 0}).to_list(100)
+    return ads
+
+@api_router.post("/admin/ads")
+async def admin_create_ad(ad: AdBanner, admin=Depends(get_admin)):
+    new_ad = AdBanner(**ad.model_dump())
+    await db.ads.insert_one(new_ad.model_dump())
+    return new_ad
+
+@api_router.put("/admin/ads/{ad_id}")
+async def admin_update_ad(ad_id: str, ad: AdBanner, admin=Depends(get_admin)):
+    await db.ads.update_one({"id": ad_id}, {"$set": ad.model_dump()})
+    return {"success": True}
+
+@api_router.delete("/admin/ads/{ad_id}")
+async def admin_delete_ad(ad_id: str, admin=Depends(get_admin)):
+    await db.ads.delete_one({"id": ad_id})
     return {"success": True}
 
 @api_router.get("/admin/users")
