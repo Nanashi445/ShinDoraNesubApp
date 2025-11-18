@@ -340,49 +340,44 @@ async def admin_login(data: AdminLogin):
     return {"token": token}
 
 @api_router.post("/admin/videos")
-async def admin_create_video(video: VideoCreate, user=Depends(get_current_user)):
-    if user.get("username") != "admin":
-        payload = jwt.decode(user.get("token", ""), SECRET_KEY, algorithms=[ALGORITHM]) if "token" in user else {}
-        if payload.get("role") != "admin":
-            raise HTTPException(status_code=403, detail="Admin only")
-    
+async def admin_create_video(video: VideoCreate, admin=Depends(get_admin)):
     new_video = Video(**video.model_dump())
     await db.videos.insert_one(new_video.model_dump())
     return new_video
 
 @api_router.put("/admin/videos/{video_id}")
-async def admin_update_video(video_id: str, video: VideoCreate):
+async def admin_update_video(video_id: str, video: VideoCreate, admin=Depends(get_admin)):
     await db.videos.update_one({"id": video_id}, {"$set": video.model_dump()})
     return {"success": True}
 
 @api_router.delete("/admin/videos/{video_id}")
-async def admin_delete_video(video_id: str):
+async def admin_delete_video(video_id: str, admin=Depends(get_admin)):
     await db.videos.delete_one({"id": video_id})
     await db.comments.delete_many({"video_id": video_id})
     return {"success": True}
 
 @api_router.put("/admin/settings")
-async def admin_update_settings(settings: Settings):
+async def admin_update_settings(settings: Settings, admin=Depends(get_admin)):
     await db.settings.update_one({}, {"$set": settings.model_dump()}, upsert=True)
     return {"success": True}
 
 @api_router.post("/admin/categories")
-async def admin_create_category(category: Category):
+async def admin_create_category(category: Category, admin=Depends(get_admin)):
     await db.categories.insert_one(category.model_dump())
     return category
 
 @api_router.put("/admin/categories/{category_id}")
-async def admin_update_category(category_id: str, category: Category):
+async def admin_update_category(category_id: str, category: Category, admin=Depends(get_admin)):
     await db.categories.update_one({"id": category_id}, {"$set": category.model_dump()})
     return {"success": True}
 
 @api_router.delete("/admin/categories/{category_id}")
-async def admin_delete_category(category_id: str):
+async def admin_delete_category(category_id: str, admin=Depends(get_admin)):
     await db.categories.delete_one({"id": category_id})
     return {"success": True}
 
 @api_router.put("/admin/pages/{page_name}")
-async def admin_update_page(page_name: str, page: Page):
+async def admin_update_page(page_name: str, page: Page, admin=Depends(get_admin)):
     await db.pages.update_one({"page_name": page_name}, {"$set": page.model_dump()}, upsert=True)
     return {"success": True}
 
