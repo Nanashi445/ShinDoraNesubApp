@@ -243,6 +243,33 @@ const VideoPlayer = () => {
             <Clock className="w-4 h-4 mr-2" />
             {t(translate.watchLater)}
           </Button>
+          {user && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" data-testid="add-to-playlist-btn">
+                  <List className="w-4 h-4 mr-2" />
+                  {t({ id: 'Simpan ke Playlist', en: 'Save to Playlist' })}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                {playlists.length === 0 ? (
+                  <DropdownMenuItem disabled>
+                    {t({ id: 'Belum ada playlist. Buat dulu di halaman Playlist.', en: 'No playlists yet. Create one in Playlists page.' })}
+                  </DropdownMenuItem>
+                ) : (
+                  playlists.map((playlist) => (
+                    <DropdownMenuItem
+                      key={playlist.id}
+                      onClick={() => handleAddToPlaylist(playlist.id)}
+                      data-testid={`playlist-option-${playlist.id}`}
+                    >
+                      {playlist.name}
+                    </DropdownMenuItem>
+                  ))
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
 
         <Card>
