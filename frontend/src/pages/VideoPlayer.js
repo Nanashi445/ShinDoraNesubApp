@@ -63,6 +63,28 @@ const VideoPlayer = () => {
     }
   };
 
+  const fetchPlaylists = async () => {
+    try {
+      const response = await axios.get(`${API}/playlists?user_id=${user.username}`);
+      setPlaylists(response.data.filter(p => p.user_id === user.username));
+    } catch (error) {
+      console.error('Failed to fetch playlists:', error);
+    }
+  };
+
+  const handleAddToPlaylist = async (playlistId) => {
+    try {
+      await axios.post(
+        `${API}/playlists/${playlistId}/videos/${id}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success(t({ id: 'Ditambahkan ke playlist', en: 'Added to playlist' }));
+    } catch (error) {
+      toast.error('Failed to add to playlist');
+    }
+  };
+
   const incrementView = async () => {
     try {
       await axios.post(`${API}/videos/${id}/view`);
