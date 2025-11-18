@@ -591,7 +591,7 @@ async def admin_delete_ad(ad_id: str, admin=Depends(get_admin)):
 
 @api_router.get("/admin/users")
 async def admin_get_users(admin=Depends(get_admin)):
-    users = await db.users.find({}, {"password_hash": 0, "_id": 0}).to_list(1000)
+    users = await db.users.find({}, {"_id": 0}).to_list(1000)
     return users
 
 @api_router.delete("/admin/users/{username}")
