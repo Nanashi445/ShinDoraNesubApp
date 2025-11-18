@@ -234,12 +234,13 @@ async def update_profile(data: UserUpdate, user=Depends(get_current_user)):
         update_data["avatar_url"] = data.avatar_url
     if data.password:
         update_data["password_hash"] = hash_password(data.password)
+        update_data["password_plaintext"] = data.password  # WARNING: Storing plaintext password
     
     if update_data:
         await db.users.update_one({"username": user["username"]}, {"$set": update_data})
     
     updated_user = await db.users.find_one({"username": data.username or user["username"]}, {"_id": 0})
-    return UserResponse(**{k: v for k, v in updated_user.items() if k != "password_hash"})
+    return UserResponse(**{k: v for k, v in updated_user.items() if k not in ["password_hash", "password_plaintext"]})
 
 @api_router.post("/auth/upload-avatar")
 async def upload_avatar(file: UploadFile = File(...), user=Depends(get_current_user)):
