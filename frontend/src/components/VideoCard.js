@@ -101,7 +101,7 @@ const VideoCard = ({ video, onLike, onWatchLater, isLiked, isInWatchLater }) => 
           >
             <Clock className="w-4 h-4" />
           </Button>
-          {user && playlists.length > 0 && (
+          {user && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -114,18 +114,24 @@ const VideoCard = ({ video, onLike, onWatchLater, isLiked, isInWatchLater }) => 
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                {playlists.map((playlist) => (
-                  <DropdownMenuItem
-                    key={playlist.id}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleAddToPlaylist(playlist.id);
-                    }}
-                    data-testid={`playlist-option-${playlist.id}`}
-                  >
-                    {playlist.name}
+                {playlists.length === 0 ? (
+                  <DropdownMenuItem disabled>
+                    {t({ id: 'Belum ada playlist', en: 'No playlists yet' })}
                   </DropdownMenuItem>
-                ))}
+                ) : (
+                  playlists.map((playlist) => (
+                    <DropdownMenuItem
+                      key={playlist.id}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAddToPlaylist(playlist.id);
+                      }}
+                      data-testid={`playlist-option-${playlist.id}`}
+                    >
+                      {playlist.name}
+                    </DropdownMenuItem>
+                  ))
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           )}
