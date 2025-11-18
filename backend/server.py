@@ -83,11 +83,14 @@ class Comment(BaseModel):
     username: str
     avatar: str
     comment: str
+    parent_comment_id: Optional[str] = None
+    replies: List[str] = []
     created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 class CommentCreate(BaseModel):
     video_id: str
     comment: str
+    parent_comment_id: Optional[str] = None
 
 class Category(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
