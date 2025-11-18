@@ -187,6 +187,18 @@ const Header = ({ onMenuClick }) => {
                 data-testid="auth-username-input"
               />
             </div>
+            {authMode === 'register' && (
+              <div>
+                <Label htmlFor="display_name">{language === 'id' ? 'Nama Pengguna' : 'Display Name'}</Label>
+                <Input
+                  id="display_name"
+                  value={authData.display_name}
+                  onChange={(e) => setAuthData({ ...authData, display_name: e.target.value })}
+                  required
+                  data-testid="auth-display-name-input"
+                />
+              </div>
+            )}
             <div>
               <Label htmlFor="password">{t(translate.password)}</Label>
               <Input
