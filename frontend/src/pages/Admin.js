@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { ArrowLeft, Plus, Edit, Trash2, Save, X } from 'lucide-react';
+import { ArrowLeft, Plus, Edit, Trash2, Save, X, Eye, EyeOff } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
@@ -9,6 +9,8 @@ import { Textarea } from '../components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { Switch } from '../components/ui/switch';
 import { toast } from 'sonner';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -21,10 +23,27 @@ const Admin = () => {
   const [videos, setVideos] = useState([]);
   const [categories, setCategories] = useState([]);
   const [settings, setSettings] = useState(null);
-  const [pages, setPages] = useState({});
+  const [pages, setPages] = useState([]);
   const [users, setUsers] = useState([]);
-  const [editingVideo, setEditingVideo] = useState(null);
+  const [playlists, setPlaylists] = useState([]);
+  const [ads, setAds] = useState([]);
+  const [showPasswords, setShowPasswords] = useState({});
+  
+  // Dialog states
   const [showVideoDialog, setShowVideoDialog] = useState(false);
+  const [showCategoryDialog, setShowCategoryDialog] = useState(false);
+  const [showPageDialog, setShowPageDialog] = useState(false);
+  const [showAdDialog, setShowAdDialog] = useState(false);
+  const [showSocialDialog, setShowSocialDialog] = useState(false);
+  const [showSupportDialog, setShowSupportDialog] = useState(false);
+  
+  // Editing states
+  const [editingVideo, setEditingVideo] = useState(null);
+  const [editingCategory, setEditingCategory] = useState(null);
+  const [editingPage, setEditingPage] = useState(null);
+  const [editingAd, setEditingAd] = useState(null);
+  const [editingSocial, setEditingSocial] = useState(null);
+  const [editingSupport, setEditingSupport] = useState(null);
 
   useEffect(() => {
     if (adminToken) {
@@ -35,31 +54,24 @@ const Admin = () => {
 
   const fetchData = async () => {
     try {
-      const [videosRes, categoriesRes, settingsRes, usersRes] = await Promise.all([
+      const [videosRes, categoriesRes, settingsRes, usersRes, playlistsRes, adsRes] = await Promise.all([
         axios.get(`${API}/videos`),
         axios.get(`${API}/categories`),
         axios.get(`${API}/settings`),
-        axios.get(`${API}/admin/users`, {
-          headers: { Authorization: `Bearer ${adminToken}` }
-        })
+        axios.get(`${API}/admin/users`, { headers: { Authorization: `Bearer ${adminToken}` } }),
+        axios.get(`${API}/admin/playlists`, { headers: { Authorization: `Bearer ${adminToken}` } }),
+        axios.get(`${API}/admin/ads`, { headers: { Authorization: `Bearer ${adminToken}` } })
       ]);
       setVideos(videosRes.data);
       setCategories(categoriesRes.data);
       setSettings(settingsRes.data);
       setUsers(usersRes.data);
+      setPlaylists(playlistsRes.data);
+      setAds(adsRes.data);
 
       // Fetch pages
-      const pageNames = ['about', 'disclaimer', 'privacy', 'terms'];
-      const pagesData = {};
-      for (const pageName of pageNames) {
-        try {
-          const res = await axios.get(`${API}/pages/${pageName}`);
-          pagesData[pageName] = res.data;
-        } catch (error) {
-          console.error(`Failed to fetch ${pageName}:`, error);
-        }
-      }
-      setPages(pagesData);
+      const pagesRes = await axios.get(`${API}/pages`);
+      setPages(pagesRes.data);
     } catch (error) {
       console.error('Failed to fetch data:', error);
     }
@@ -86,23 +98,15 @@ const Admin = () => {
     navigate('/');
   };
 
+  // ===== VIDEO HANDLERS =====
   const handleVideoSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const videoData = {
-      title: {
-        id: formData.get('title_id'),
-        en: formData.get('title_en')
-      },
-      description: {
-        id: formData.get('description_id'),
-        en: formData.get('description_en')
-      },
+      title: { id: formData.get('title_id'), en: formData.get('title_en') },
+      description: { id: formData.get('description_id'), en: formData.get('description_en') },
       embed_url: formData.get('embed_url'),
-      category: {
-        id: formData.get('category_id'),
-        en: formData.get('category_en')
-      },
+      category: { id: formData.get('category_id'), en: formData.get('category_en') },
       episode: formData.get('episode'),
       thumbnail_url: formData.get('thumbnail_url')
     };
@@ -112,12 +116,12 @@ const Admin = () => {
         await axios.put(`${API}/admin/videos/${editingVideo.id}`, videoData, {
           headers: { Authorization: `Bearer ${adminToken}` }
         });
-        toast.success('Video updated successfully');
+        toast.success('Video updated');
       } else {
         await axios.post(`${API}/admin/videos`, videoData, {
           headers: { Authorization: `Bearer ${adminToken}` }
         });
-        toast.success('Video created successfully');
+        toast.success('Video created');
       }
       setShowVideoDialog(false);
       setEditingVideo(null);
@@ -128,107 +132,225 @@ const Admin = () => {
   };
 
   const handleDeleteVideo = async (videoId) => {
-    if (!window.confirm('Are you sure you want to delete this video?')) return;
+    if (!window.confirm('Delete this video?')) return;
     try {
       await axios.delete(`${API}/admin/videos/${videoId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
-      toast.success('Video deleted successfully');
+      toast.success('Video deleted');
       fetchData();
     } catch (error) {
       toast.error('Failed to delete video');
     }
   };
 
-  const handleSettingsUpdate = async (e) => {
+  // ===== CATEGORY HANDLERS =====
+  const handleCategorySubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
-    
-    // Parse social links
-    const social_links = [];
-    let socialIndex = 0;
-    while (formData.get(`social_name_${socialIndex}`)) {
-      social_links.push({
-        name: formData.get(`social_name_${socialIndex}`),
-        url: formData.get(`social_url_${socialIndex}`)
-      });
-      socialIndex++;
-    }
-    
-    // Parse support links
-    const support_links = [];
-    let supportIndex = 0;
-    while (formData.get(`support_name_${supportIndex}`)) {
-      support_links.push({
-        name: formData.get(`support_name_${supportIndex}`),
-        url: formData.get(`support_url_${supportIndex}`)
-      });
-      supportIndex++;
-    }
-    
-    const settingsData = {
-      logo_url: formData.get('logo_url'),
-      theme: {
-        primaryColor: formData.get('primaryColor'),
-        darkBg: formData.get('darkBg'),
-        lightBg: formData.get('lightBg'),
-        textColor: formData.get('textColor')
-      },
-      ads: {
-        image: formData.get('ads_image'),
-        link: formData.get('ads_link'),
-        title: {
-          id: formData.get('ads_title_id'),
-          en: formData.get('ads_title_en')
-        }
-      },
-      social_links,
-      support_links
+    const categoryData = {
+      name: { id: formData.get('name_id'), en: formData.get('name_en') },
+      color: formData.get('color'),
+      thumbnail_url: formData.get('thumbnail_url'),
+      video_count: 0
     };
 
     try {
-      await axios.put(`${API}/admin/settings`, settingsData, {
-        headers: { Authorization: `Bearer ${adminToken}` }
-      });
-      toast.success('Settings updated successfully');
+      if (editingCategory) {
+        await axios.put(`${API}/admin/categories/${editingCategory.id}`, 
+          { ...categoryData, id: editingCategory.id },
+          { headers: { Authorization: `Bearer ${adminToken}` } }
+        );
+        toast.success('Category updated');
+      } else {
+        await axios.post(`${API}/admin/categories`, categoryData, {
+          headers: { Authorization: `Bearer ${adminToken}` }
+        });
+        toast.success('Category created');
+      }
+      setShowCategoryDialog(false);
+      setEditingCategory(null);
       fetchData();
     } catch (error) {
-      toast.error('Failed to update settings');
+      toast.error('Failed to save category');
     }
   };
 
+  const handleDeleteCategory = async (categoryId) => {
+    if (!window.confirm('Delete this category?')) return;
+    try {
+      await axios.delete(`${API}/admin/categories/${categoryId}`, {
+        headers: { Authorization: `Bearer ${adminToken}` }
+      });
+      toast.success('Category deleted');
+      fetchData();
+    } catch (error) {
+      toast.error('Failed to delete category');
+    }
+  };
+
+  // ===== PAGE HANDLERS =====
+  const handlePageSubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const pageData = {
+      page_name: formData.get('page_name'),
+      content: { id: formData.get('content_id'), en: formData.get('content_en') }
+    };
+
+    try {
+      if (editingPage) {
+        await axios.put(`${API}/admin/pages/${editingPage.page_name}`, pageData, {
+          headers: { Authorization: `Bearer ${adminToken}` }
+        });
+        toast.success('Page updated');
+      } else {
+        await axios.post(`${API}/admin/pages`, pageData, {
+          headers: { Authorization: `Bearer ${adminToken}` }
+        });
+        toast.success('Page created');
+      }
+      setShowPageDialog(false);
+      setEditingPage(null);
+      fetchData();
+    } catch (error) {
+      toast.error('Failed to save page');
+    }
+  };
+
+  const handleDeletePage = async (pageName) => {
+    if (!window.confirm('Delete this page?')) return;
+    try {
+      await axios.delete(`${API}/admin/pages/${pageName}`, {
+        headers: { Authorization: `Bearer ${adminToken}` }
+      });
+      toast.success('Page deleted');
+      fetchData();
+    } catch (error) {
+      toast.error('Failed to delete page');
+    }
+  };
+
+  // ===== AD HANDLERS =====
+  const handleAdSubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const adData = {
+      title: { id: formData.get('title_id'), en: formData.get('title_en') },
+      image_url: formData.get('image_url'),
+      link: formData.get('link'),
+      position: formData.get('position'),
+      enabled: formData.get('enabled') === 'true'
+    };
+
+    try {
+      if (editingAd) {
+        await axios.put(`${API}/admin/ads/${editingAd.id}`, 
+          { ...adData, id: editingAd.id },
+          { headers: { Authorization: `Bearer ${adminToken}` } }
+        );
+        toast.success('Ad updated');
+      } else {
+        await axios.post(`${API}/admin/ads`, adData, {
+          headers: { Authorization: `Bearer ${adminToken}` }
+        });
+        toast.success('Ad created');
+      }
+      setShowAdDialog(false);
+      setEditingAd(null);
+      fetchData();
+    } catch (error) {
+      toast.error('Failed to save ad');
+    }
+  };
+
+  const handleDeleteAd = async (adId) => {
+    if (!window.confirm('Delete this ad?')) return;
+    try {
+      await axios.delete(`${API}/admin/ads/${adId}`, {
+        headers: { Authorization: `Bearer ${adminToken}` }
+      });
+      toast.success('Ad deleted');
+      fetchData();
+    } catch (error) {
+      toast.error('Failed to delete ad');
+    }
+  };
+
+  // ===== SOCIAL/SUPPORT HANDLERS =====
+  const handleSocialSupportUpdate = async () => {
+    try {
+      await axios.put(`${API}/admin/settings`, settings, {
+        headers: { Authorization: `Bearer ${adminToken}` }
+      });
+      toast.success('Links updated');
+      fetchData();
+    } catch (error) {
+      toast.error('Failed to update links');
+    }
+  };
+
+  const handleAddSocial = () => {
+    const newLinks = [...(settings.social_links || []), { name: '', url: '' }];
+    setSettings({ ...settings, social_links: newLinks });
+  };
+
+  const handleRemoveSocial = (index) => {
+    const newLinks = settings.social_links.filter((_, i) => i !== index);
+    setSettings({ ...settings, social_links: newLinks });
+  };
+
+  const handleUpdateSocial = (index, field, value) => {
+    const newLinks = [...settings.social_links];
+    newLinks[index][field] = value;
+    setSettings({ ...settings, social_links: newLinks });
+  };
+
+  const handleAddSupport = () => {
+    const newLinks = [...(settings.support_links || []), { name: '', url: '' }];
+    setSettings({ ...settings, support_links: newLinks });
+  };
+
+  const handleRemoveSupport = (index) => {
+    const newLinks = settings.support_links.filter((_, i) => i !== index);
+    setSettings({ ...settings, support_links: newLinks });
+  };
+
+  const handleUpdateSupport = (index, field, value) => {
+    const newLinks = [...settings.support_links];
+    newLinks[index][field] = value;
+    setSettings({ ...settings, support_links: newLinks });
+  };
+
+  // ===== USER HANDLERS =====
   const handleDeleteUser = async (username) => {
-    if (!window.confirm(`Are you sure you want to delete user "${username}"?`)) return;
+    if (!window.confirm(`Delete user "${username}"?`)) return;
     try {
       await axios.delete(`${API}/admin/users/${username}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
-      toast.success('User deleted successfully');
+      toast.success('User deleted');
       fetchData();
     } catch (error) {
       toast.error('Failed to delete user');
     }
   };
 
-  const handlePageUpdate = async (pageName, e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const pageData = {
-      page_name: pageName,
-      content: {
-        id: formData.get('content_id'),
-        en: formData.get('content_en')
-      }
-    };
+  const togglePasswordVisibility = (username) => {
+    setShowPasswords({ ...showPasswords, [username]: !showPasswords[username] });
+  };
 
+  // ===== PLAYLIST HANDLERS =====
+  const handleDeletePlaylist = async (playlistId) => {
+    if (!window.confirm('Delete this playlist?')) return;
     try {
-      await axios.put(`${API}/admin/pages/${pageName}`, pageData, {
+      await axios.delete(`${API}/admin/playlists/${playlistId}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
-      toast.success('Page updated successfully');
+      toast.success('Playlist deleted');
       fetchData();
     } catch (error) {
-      toast.error('Failed to update page');
+      toast.error('Failed to delete playlist');
     }
   };
 
@@ -285,14 +407,16 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="videos" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="videos" data-testid="videos-tab">Videos</TabsTrigger>
-            <TabsTrigger value="users" data-testid="users-tab">Users</TabsTrigger>
             <TabsTrigger value="categories" data-testid="categories-tab">Categories</TabsTrigger>
-            <TabsTrigger value="settings" data-testid="settings-tab">Settings</TabsTrigger>
             <TabsTrigger value="pages" data-testid="pages-tab">Pages</TabsTrigger>
+            <TabsTrigger value="ads" data-testid="ads-tab">Ads</TabsTrigger>
+            <TabsTrigger value="users" data-testid="users-tab">Users</TabsTrigger>
+            <TabsTrigger value="settings" data-testid="settings-tab">Settings</TabsTrigger>
           </TabsList>
 
+          {/* VIDEOS TAB */}
           <TabsContent value="videos" className="space-y-4">
             <Button onClick={() => { setEditingVideo(null); setShowVideoDialog(true); }} data-testid="add-video-btn">
               <Plus className="w-4 h-4 mr-2" />
@@ -304,8 +428,8 @@ const Admin = () => {
                 <Card key={video.id} data-testid={`video-item-${video.id}`}>
                   <CardContent className="p-4 flex items-center justify-between">
                     <div className="flex-1">
-                      <h3 className="font-semibold">{video.title.en} / {video.title.id}</h3>
-                      <p className="text-sm text-gray-500">{video.category.en} - {video.views} views</p>
+                      <h3 className="font-semibold">{video.title.en}</h3>
+                      <p className="text-sm text-gray-500">{video.category.en} - Episode {video.episode} - {video.views} views</p>
                     </div>
                     <div className="flex gap-2">
                       <Button
@@ -331,7 +455,128 @@ const Admin = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="users">
+          {/* CATEGORIES TAB */}
+          <TabsContent value="categories" className="space-y-4">
+            <Button onClick={() => { setEditingCategory(null); setShowCategoryDialog(true); }} data-testid="add-category-btn">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Category
+            </Button>
+
+            <div className="grid gap-4">
+              {categories.map((category) => (
+                <Card key={category.id} data-testid={`category-item-${category.id}`}>
+                  <CardContent className="p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded" style={{ backgroundColor: category.color }} />
+                      <div>
+                        <h3 className="font-semibold">{category.name.en} / {category.name.id}</h3>
+                        <p className="text-sm text-gray-500">{category.video_count || 0} videos</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => { setEditingCategory(category); setShowCategoryDialog(true); }}
+                        data-testid={`edit-category-${category.id}`}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleDeleteCategory(category.id)}
+                        data-testid={`delete-category-${category.id}`}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* PAGES TAB */}
+          <TabsContent value="pages" className="space-y-4">
+            <Button onClick={() => { setEditingPage(null); setShowPageDialog(true); }} data-testid="add-page-btn">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Page
+            </Button>
+
+            <div className="grid gap-4">
+              {pages.map((page) => (
+                <Card key={page.page_name} data-testid={`page-item-${page.page_name}`}>
+                  <CardContent className="p-4 flex items-center justify-between">
+                    <div className="flex-1">
+                      <h3 className="font-semibold capitalize">{page.page_name}</h3>
+                      <p className="text-sm text-gray-500 line-clamp-1">{page.content.en.substring(0, 100)}...</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => { setEditingPage(page); setShowPageDialog(true); }}
+                        data-testid={`edit-page-${page.page_name}`}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleDeletePage(page.page_name)}
+                        data-testid={`delete-page-${page.page_name}`}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* ADS TAB */}
+          <TabsContent value="ads" className="space-y-4">
+            <Button onClick={() => { setEditingAd(null); setShowAdDialog(true); }} data-testid="add-ad-btn">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Advertisement
+            </Button>
+
+            <div className="grid gap-4">
+              {ads.map((ad) => (
+                <Card key={ad.id} data-testid={`ad-item-${ad.id}`}>
+                  <CardContent className="p-4 flex items-center justify-between">
+                    <div className="flex-1">
+                      <h3 className="font-semibold">{ad.title.en}</h3>
+                      <p className="text-sm text-gray-500">Position: {ad.position} - {ad.enabled ? 'Enabled' : 'Disabled'}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => { setEditingAd(ad); setShowAdDialog(true); }}
+                        data-testid={`edit-ad-${ad.id}`}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleDeleteAd(ad.id)}
+                        data-testid={`delete-ad-${ad.id}`}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* USERS TAB */}
+          <TabsContent value="users" className="space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle>Manage Users</CardTitle>
@@ -340,27 +585,44 @@ const Admin = () => {
                 <div className="space-y-4">
                   {users.map((user) => (
                     <Card key={user.username} data-testid={`user-item-${user.username}`}>
-                      <CardContent className="p-4 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <img src={user.avatar_url} alt={user.username} className="w-10 h-10 rounded-full" />
-                          <div>
-                            <h3 className="font-semibold">{user.username}</h3>
-                            <p className="text-sm text-gray-500">{user.email || 'No email'}</p>
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3 flex-1">
+                            <img src={user.avatar_url} alt={user.username} className="w-10 h-10 rounded-full" />
+                            <div className="flex-1">
+                              <h3 className="font-semibold">{user.username}</h3>
+                              <p className="text-sm text-gray-500">{user.email || 'No email'}</p>
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className="text-xs text-gray-400">Password:</span>
+                                <code className="text-xs bg-gray-800 px-2 py-1 rounded">
+                                  {showPasswords[user.username] ? '********' : '••••••••'}
+                                </code>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => togglePasswordVisibility(user.username)}
+                                  data-testid={`toggle-password-${user.username}`}
+                                >
+                                  {showPasswords[user.username] ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                                </Button>
+                                <span className="text-xs text-yellow-500 ml-2">(Hashed - cannot show plaintext)</span>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <div className="text-sm text-gray-500">
-                            <span>{user.liked_videos?.length || 0} likes</span>
-                            <span className="ml-3">{user.watch_later?.length || 0} saved</span>
+                          <div className="flex items-center gap-4">
+                            <div className="text-sm text-gray-500">
+                              <span>{user.liked_videos?.length || 0} likes</span>
+                              <span className="ml-3">{user.watch_later?.length || 0} saved</span>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => handleDeleteUser(user.username)}
+                              data-testid={`delete-user-${user.username}`}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
                           </div>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => handleDeleteUser(user.username)}
-                            data-testid={`delete-user-${user.username}`}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -370,206 +632,126 @@ const Admin = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="settings">
+          {/* SETTINGS TAB */}
+          <TabsContent value="settings" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Site Settings</CardTitle>
+                <CardTitle>Social Links (Ikuti ShinDoraNesub)</CardTitle>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleSettingsUpdate} className="space-y-6">
-                  <div>
-                    <Label htmlFor="logo_url">Logo URL</Label>
-                    <Input
-                      id="logo_url"
-                      name="logo_url"
-                      defaultValue={settings?.logo_url}
-                      data-testid="logo-url-input"
-                    />
-                  </div>
-
-                  <div className="border-t pt-4">
-                    <h3 className="font-semibold mb-4">Theme Colors</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="primaryColor">Primary Color</Label>
-                        <Input
-                          id="primaryColor"
-                          name="primaryColor"
-                          type="color"
-                          defaultValue={settings?.theme?.primaryColor}
-                          data-testid="primary-color-input"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="darkBg">Dark Background</Label>
-                        <Input
-                          id="darkBg"
-                          name="darkBg"
-                          type="color"
-                          defaultValue={settings?.theme?.darkBg}
-                          data-testid="dark-bg-input"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="lightBg">Light Background</Label>
-                        <Input
-                          id="lightBg"
-                          name="lightBg"
-                          type="color"
-                          defaultValue={settings?.theme?.lightBg}
-                          data-testid="light-bg-input"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="textColor">Text Color</Label>
-                        <Input
-                          id="textColor"
-                          name="textColor"
-                          type="color"
-                          defaultValue={settings?.theme?.textColor}
-                          data-testid="text-color-input"
-                        />
-                      </div>
+                <div className="space-y-3">
+                  {settings?.social_links?.map((link, index) => (
+                    <div key={index} className="flex gap-2">
+                      <Input
+                        placeholder="Name"
+                        value={link.name}
+                        onChange={(e) => handleUpdateSocial(index, 'name', e.target.value)}
+                        data-testid={`social-name-${index}`}
+                      />
+                      <Input
+                        placeholder="URL"
+                        value={link.url}
+                        onChange={(e) => handleUpdateSocial(index, 'url', e.target.value)}
+                        data-testid={`social-url-${index}`}
+                      />
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleRemoveSocial(index)}
+                        data-testid={`remove-social-${index}`}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
+                  ))}
+                  <div className="flex gap-2">
+                    <Button onClick={handleAddSocial} variant="outline" data-testid="add-social-btn">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Social Link
+                    </Button>
+                    <Button onClick={handleSocialSupportUpdate} data-testid="save-social-btn">
+                      <Save className="w-4 h-4 mr-2" />
+                      Save Changes
+                    </Button>
                   </div>
-
-                  <div className="border-t pt-4">
-                    <h3 className="font-semibold mb-4">Social Links (Ikuti ShinDoraNesub)</h3>
-                    <div className="space-y-3">
-                      {settings?.social_links?.map((link, index) => (
-                        <div key={index} className="grid grid-cols-2 gap-2">
-                          <Input
-                            name={`social_name_${index}`}
-                            placeholder="Name"
-                            defaultValue={link.name}
-                            data-testid={`social-name-${index}`}
-                          />
-                          <Input
-                            name={`social_url_${index}`}
-                            placeholder="URL"
-                            defaultValue={link.url}
-                            data-testid={`social-url-${index}`}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="border-t pt-4">
-                    <h3 className="font-semibold mb-4">Support Links (Dukung Kami)</h3>
-                    <div className="space-y-3">
-                      {settings?.support_links?.map((link, index) => (
-                        <div key={index} className="grid grid-cols-2 gap-2">
-                          <Input
-                            name={`support_name_${index}`}
-                            placeholder="Name"
-                            defaultValue={link.name}
-                            data-testid={`support-name-${index}`}
-                          />
-                          <Input
-                            name={`support_url_${index}`}
-                            placeholder="URL"
-                            defaultValue={link.url}
-                            data-testid={`support-url-${index}`}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="border-t pt-4">
-                    <h3 className="font-semibold mb-4">Advertisement</h3>
-                    <div className="space-y-3">
-                      <div>
-                        <Label htmlFor="ads_image">Ad Image URL</Label>
-                        <Input
-                          id="ads_image"
-                          name="ads_image"
-                          defaultValue={settings?.ads?.image}
-                          data-testid="ads-image-input"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="ads_link">Ad Link</Label>
-                        <Input
-                          id="ads_link"
-                          name="ads_link"
-                          defaultValue={settings?.ads?.link}
-                          data-testid="ads-link-input"
-                        />
-                      </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <div>
-                          <Label htmlFor="ads_title_id">Ad Title (ID)</Label>
-                          <Input
-                            id="ads_title_id"
-                            name="ads_title_id"
-                            defaultValue={settings?.ads?.title?.id}
-                            data-testid="ads-title-id-input"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="ads_title_en">Ad Title (EN)</Label>
-                          <Input
-                            id="ads_title_en"
-                            name="ads_title_en"
-                            defaultValue={settings?.ads?.title?.en}
-                            data-testid="ads-title-en-input"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <Button type="submit" data-testid="save-settings-btn">
-                    <Save className="w-4 h-4 mr-2" />
-                    Save Settings
-                  </Button>
-                </form>
+                </div>
               </CardContent>
             </Card>
-          </TabsContent>
 
-          <TabsContent value="pages" className="space-y-4">
-            {['about', 'disclaimer', 'privacy', 'terms'].map((pageName) => (
-              <Card key={pageName}>
-                <CardHeader>
-                  <CardTitle className="capitalize">{pageName}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <form onSubmit={(e) => handlePageUpdate(pageName, e)} className="space-y-4">
-                    <div>
-                      <Label htmlFor={`${pageName}_content_id`}>Content (Indonesian)</Label>
-                      <Textarea
-                        id={`${pageName}_content_id`}
-                        name="content_id"
-                        rows={5}
-                        defaultValue={pages[pageName]?.content?.id}
-                        data-testid={`${pageName}-content-id-input`}
+            <Card>
+              <CardHeader>
+                <CardTitle>Support Links (Dukung Kami)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {settings?.support_links?.map((link, index) => (
+                    <div key={index} className="flex gap-2">
+                      <Input
+                        placeholder="Name"
+                        value={link.name}
+                        onChange={(e) => handleUpdateSupport(index, 'name', e.target.value)}
+                        data-testid={`support-name-${index}`}
                       />
-                    </div>
-                    <div>
-                      <Label htmlFor={`${pageName}_content_en`}>Content (English)</Label>
-                      <Textarea
-                        id={`${pageName}_content_en`}
-                        name="content_en"
-                        rows={5}
-                        defaultValue={pages[pageName]?.content?.en}
-                        data-testid={`${pageName}-content-en-input`}
+                      <Input
+                        placeholder="URL"
+                        value={link.url}
+                        onChange={(e) => handleUpdateSupport(index, 'url', e.target.value)}
+                        data-testid={`support-url-${index}`}
                       />
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleRemoveSupport(index)}
+                        data-testid={`remove-support-${index}`}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
-                    <Button type="submit" data-testid={`save-${pageName}-btn`}>
-                      <Save className="w-4 h-4 mr-2" />
-                      Save
+                  ))}
+                  <div className="flex gap-2">
+                    <Button onClick={handleAddSupport} variant="outline" data-testid="add-support-btn">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Support Link
                     </Button>
-                  </form>
-                </CardContent>
-              </Card>
-            ))}
+                    <Button onClick={handleSocialSupportUpdate} data-testid="save-support-btn">
+                      <Save className="w-4 h-4 mr-2" />
+                      Save Changes
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Playlists</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {playlists.map((playlist) => (
+                    <div key={playlist.id} className="flex items-center justify-between p-3 border rounded">
+                      <div>
+                        <h4 className="font-semibold">{playlist.name}</h4>
+                        <p className="text-sm text-gray-500">By {playlist.user_id} - {playlist.video_ids?.length || 0} videos</p>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleDeletePlaylist(playlist.id)}
+                        data-testid={`delete-playlist-${playlist.id}`}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>
 
+      {/* VIDEO DIALOG */}
       <Dialog open={showVideoDialog} onOpenChange={setShowVideoDialog}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" data-testid="video-dialog">
           <DialogHeader>
@@ -578,117 +760,189 @@ const Admin = () => {
           <form onSubmit={handleVideoSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="title_id">Title (Indonesian)</Label>
-                <Input
-                  id="title_id"
-                  name="title_id"
-                  defaultValue={editingVideo?.title?.id}
-                  required
-                  data-testid="video-title-id-input"
-                />
+                <Label>Title (Indonesian)</Label>
+                <Input name="title_id" defaultValue={editingVideo?.title?.id} required data-testid="video-title-id-input" />
               </div>
               <div>
-                <Label htmlFor="title_en">Title (English)</Label>
-                <Input
-                  id="title_en"
-                  name="title_en"
-                  defaultValue={editingVideo?.title?.en}
-                  required
-                  data-testid="video-title-en-input"
-                />
+                <Label>Title (English)</Label>
+                <Input name="title_en" defaultValue={editingVideo?.title?.en} required data-testid="video-title-en-input" />
               </div>
             </div>
-
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="description_id">Description (Indonesian)</Label>
-                <Textarea
-                  id="description_id"
-                  name="description_id"
-                  defaultValue={editingVideo?.description?.id}
-                  required
-                  data-testid="video-description-id-input"
-                />
+                <Label>Description (ID)</Label>
+                <Textarea name="description_id" defaultValue={editingVideo?.description?.id} required data-testid="video-description-id-input" />
               </div>
               <div>
-                <Label htmlFor="description_en">Description (English)</Label>
-                <Textarea
-                  id="description_en"
-                  name="description_en"
-                  defaultValue={editingVideo?.description?.en}
-                  required
-                  data-testid="video-description-en-input"
-                />
+                <Label>Description (EN)</Label>
+                <Textarea name="description_en" defaultValue={editingVideo?.description?.en} required data-testid="video-description-en-input" />
               </div>
             </div>
-
             <div>
-              <Label htmlFor="embed_url">Embed URL (iframe src)</Label>
-              <Input
-                id="embed_url"
-                name="embed_url"
-                defaultValue={editingVideo?.embed_url}
-                required
-                placeholder="https://www.youtube.com/embed/..."
-                data-testid="video-embed-url-input"
-              />
+              <Label>Embed URL</Label>
+              <Input name="embed_url" defaultValue={editingVideo?.embed_url} required placeholder="https://www.youtube.com/embed/..." data-testid="video-embed-url-input" />
             </div>
-
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="category_id">Category (Indonesian)</Label>
-                <Input
-                  id="category_id"
-                  name="category_id"
-                  defaultValue={editingVideo?.category?.id}
-                  required
-                  data-testid="video-category-id-input"
-                />
+                <Label>Category (ID)</Label>
+                <Input name="category_id" defaultValue={editingVideo?.category?.id} required data-testid="video-category-id-input" />
               </div>
               <div>
-                <Label htmlFor="category_en">Category (English)</Label>
-                <Input
-                  id="category_en"
-                  name="category_en"
-                  defaultValue={editingVideo?.category?.en}
-                  required
-                  data-testid="video-category-en-input"
-                />
+                <Label>Category (EN)</Label>
+                <Input name="category_en" defaultValue={editingVideo?.category?.en} required data-testid="video-category-en-input" />
               </div>
             </div>
-
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="episode">Episode</Label>
-                <Input
-                  id="episode"
-                  name="episode"
-                  defaultValue={editingVideo?.episode}
-                  data-testid="video-episode-input"
-                />
+                <Label>Episode</Label>
+                <Input name="episode" defaultValue={editingVideo?.episode} data-testid="video-episode-input" />
               </div>
               <div>
-                <Label htmlFor="thumbnail_url">Thumbnail URL</Label>
-                <Input
-                  id="thumbnail_url"
-                  name="thumbnail_url"
-                  defaultValue={editingVideo?.thumbnail_url}
-                  data-testid="video-thumbnail-input"
-                />
+                <Label>Thumbnail URL</Label>
+                <Input name="thumbnail_url" defaultValue={editingVideo?.thumbnail_url} data-testid="video-thumbnail-input" />
               </div>
             </div>
-
             <div className="flex gap-2">
               <Button type="submit" className="flex-1" data-testid="video-submit-btn">
                 <Save className="w-4 h-4 mr-2" />
                 {editingVideo ? 'Update' : 'Create'}
               </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => { setShowVideoDialog(false); setEditingVideo(null); }}
-                data-testid="video-cancel-btn"
-              >
+              <Button type="button" variant="outline" onClick={() => { setShowVideoDialog(false); setEditingVideo(null); }} data-testid="video-cancel-btn">
+                <X className="w-4 h-4 mr-2" />
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* CATEGORY DIALOG */}
+      <Dialog open={showCategoryDialog} onOpenChange={setShowCategoryDialog}>
+        <DialogContent data-testid="category-dialog">
+          <DialogHeader>
+            <DialogTitle>{editingCategory ? 'Edit Category' : 'Add Category'}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleCategorySubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Name (Indonesian)</Label>
+                <Input name="name_id" defaultValue={editingCategory?.name?.id} required data-testid="category-name-id-input" />
+              </div>
+              <div>
+                <Label>Name (English)</Label>
+                <Input name="name_en" defaultValue={editingCategory?.name?.en} required data-testid="category-name-en-input" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Color</Label>
+                <Input name="color" type="color" defaultValue={editingCategory?.color || '#3B82F6'} required data-testid="category-color-input" />
+              </div>
+              <div>
+                <Label>Thumbnail URL</Label>
+                <Input name="thumbnail_url" defaultValue={editingCategory?.thumbnail_url} data-testid="category-thumbnail-input" />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button type="submit" className="flex-1" data-testid="category-submit-btn">
+                <Save className="w-4 h-4 mr-2" />
+                {editingCategory ? 'Update' : 'Create'}
+              </Button>
+              <Button type="button" variant="outline" onClick={() => { setShowCategoryDialog(false); setEditingCategory(null); }} data-testid="category-cancel-btn">
+                <X className="w-4 h-4 mr-2" />
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* PAGE DIALOG */}
+      <Dialog open={showPageDialog} onOpenChange={setShowPageDialog}>
+        <DialogContent className="max-w-2xl" data-testid="page-dialog">
+          <DialogHeader>
+            <DialogTitle>{editingPage ? 'Edit Page' : 'Add Page'}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handlePageSubmit} className="space-y-4">
+            <div>
+              <Label>Page Name</Label>
+              <Input name="page_name" defaultValue={editingPage?.page_name} required disabled={!!editingPage} placeholder="about, disclaimer, privacy, etc" data-testid="page-name-input" />
+            </div>
+            <div>
+              <Label>Content (Indonesian)</Label>
+              <Textarea name="content_id" defaultValue={editingPage?.content?.id} required rows={5} data-testid="page-content-id-input" />
+            </div>
+            <div>
+              <Label>Content (English)</Label>
+              <Textarea name="content_en" defaultValue={editingPage?.content?.en} required rows={5} data-testid="page-content-en-input" />
+            </div>
+            <div className="flex gap-2">
+              <Button type="submit" className="flex-1" data-testid="page-submit-btn">
+                <Save className="w-4 h-4 mr-2" />
+                {editingPage ? 'Update' : 'Create'}
+              </Button>
+              <Button type="button" variant="outline" onClick={() => { setShowPageDialog(false); setEditingPage(null); }} data-testid="page-cancel-btn">
+                <X className="w-4 h-4 mr-2" />
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* AD DIALOG */}
+      <Dialog open={showAdDialog} onOpenChange={setShowAdDialog}>
+        <DialogContent data-testid="ad-dialog">
+          <DialogHeader>
+            <DialogTitle>{editingAd ? 'Edit Advertisement' : 'Add Advertisement'}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleAdSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Title (Indonesian)</Label>
+                <Input name="title_id" defaultValue={editingAd?.title?.id} data-testid="ad-title-id-input" />
+              </div>
+              <div>
+                <Label>Title (English)</Label>
+                <Input name="title_en" defaultValue={editingAd?.title?.en} data-testid="ad-title-en-input" />
+              </div>
+            </div>
+            <div>
+              <Label>Image URL</Label>
+              <Input name="image_url" defaultValue={editingAd?.image_url} required data-testid="ad-image-input" />
+            </div>
+            <div>
+              <Label>Link URL</Label>
+              <Input name="link" defaultValue={editingAd?.link} required data-testid="ad-link-input" />
+            </div>
+            <div>
+              <Label>Position</Label>
+              <Select name="position" defaultValue={editingAd?.position || 'home_top'}>
+                <SelectTrigger data-testid="ad-position-select">
+                  <SelectValue placeholder="Select position" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="home_top">Home Top</SelectItem>
+                  <SelectItem value="home_sidebar">Home Sidebar</SelectItem>
+                  <SelectItem value="video_top">Video Top</SelectItem>
+                  <SelectItem value="video_bottom">Video Bottom</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-2">
+              <input type="hidden" name="enabled" value={editingAd?.enabled !== false ? 'true' : 'false'} />
+              <Label>Enabled</Label>
+              <Switch defaultChecked={editingAd?.enabled !== false} onCheckedChange={(checked) => {
+                const input = document.querySelector('input[name="enabled"]');
+                if (input) input.value = checked ? 'true' : 'false';
+              }} data-testid="ad-enabled-switch" />
+            </div>
+            <div className="flex gap-2">
+              <Button type="submit" className="flex-1" data-testid="ad-submit-btn">
+                <Save className="w-4 h-4 mr-2" />
+                {editingAd ? 'Update' : 'Create'}
+              </Button>
+              <Button type="button" variant="outline" onClick={() => { setShowAdDialog(false); setEditingAd(null); }} data-testid="ad-cancel-btn">
                 <X className="w-4 h-4 mr-2" />
                 Cancel
               </Button>
