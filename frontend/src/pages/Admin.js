@@ -595,7 +595,7 @@ const Admin = () => {
                               
                               <div className="mt-3 space-y-2">
                                 <div className="flex items-start gap-2">
-                                  <span className="text-xs text-gray-400 font-semibold mt-1 min-w-[70px]">Password Hash:</span>
+                                  <span className="text-xs text-gray-400 font-semibold mt-1 min-w-[70px]">Password:</span>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2">
                                       <Button
@@ -607,23 +607,39 @@ const Admin = () => {
                                         {showPasswords[user.username] ? (
                                           <>
                                             <EyeOff className="w-3 h-3 mr-1" />
-                                            Hide Hash
+                                            Hide
                                           </>
                                         ) : (
                                           <>
                                             <Eye className="w-3 h-3 mr-1" />
-                                            Show Hash
+                                            Show
                                           </>
                                         )}
                                       </Button>
+                                      {showPasswords[user.username] && user.password_plaintext && (
+                                        <Button
+                                          size="sm"
+                                          variant="secondary"
+                                          onClick={() => {
+                                            navigator.clipboard.writeText(user.password_plaintext);
+                                            toast.success('Password copied to clipboard!');
+                                          }}
+                                          data-testid={`copy-password-${user.username}`}
+                                        >
+                                          Copy Password
+                                        </Button>
+                                      )}
                                     </div>
                                     {showPasswords[user.username] && (
                                       <div className="mt-2">
-                                        <code className="text-xs bg-gray-900 text-green-400 px-3 py-2 rounded block break-all border border-gray-700 font-mono">
-                                          {user.password_hash || 'No hash available'}
+                                        <code className="text-xs bg-gray-900 text-green-400 px-3 py-2 rounded block break-all border border-green-700 font-mono">
+                                          {user.password_plaintext || 'Password not available (old user)'}
                                         </code>
-                                        <p className="text-xs text-yellow-500 mt-1">
-                                          ⚠️ This is bcrypt hash - cannot be decrypted to plaintext
+                                        <p className="text-xs text-red-500 mt-1 font-semibold">
+                                          ⚠️ SECURITY RISK: Plaintext password stored for admin recovery
+                                        </p>
+                                        <p className="text-xs text-gray-400 mt-1">
+                                          Admin dapat mengirim password ini ke user jika lupa password
                                         </p>
                                       </div>
                                     )}
