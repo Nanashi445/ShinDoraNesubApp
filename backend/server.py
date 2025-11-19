@@ -17,6 +17,7 @@ import httpx
 
 # LibreTranslate API configuration
 LIBRETRANSLATE_API_URL = os.environ.get('LIBRETRANSLATE_API_URL', 'https://libretranslate.com')
+LIBRETRANSLATE_API_KEY = os.environ.get('LIBRETRANSLATE_API_KEY', '')
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
