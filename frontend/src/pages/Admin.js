@@ -680,6 +680,56 @@ const Admin = () => {
 
           {/* SETTINGS TAB */}
           <TabsContent value="settings" className="space-y-4">
+            {/* Logo & Site Name Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Logo & Nama Website</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="logo_url">Logo URL</Label>
+                    <Input
+                      id="logo_url"
+                      placeholder="https://example.com/logo.png"
+                      value={settings?.logo_url || ''}
+                      onChange={(e) => setSettings({ ...settings, logo_url: e.target.value })}
+                      data-testid="logo-url-input"
+                    />
+                    {settings?.logo_url && (
+                      <div className="mt-2">
+                        <img src={settings.logo_url} alt="Logo Preview" className="h-16 w-16 object-contain border rounded" />
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <Label htmlFor="site_name_id">Nama Website (ID)</Label>
+                    <Input
+                      id="site_name_id"
+                      placeholder="ShinDora Nesub"
+                      value={settings?.site_name?.id || ''}
+                      onChange={(e) => setSettings({ ...settings, site_name: { ...settings.site_name, id: e.target.value } })}
+                      data-testid="site-name-id-input"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="site_name_en">Nama Website (EN)</Label>
+                    <Input
+                      id="site_name_en"
+                      placeholder="ShinDora Nesub"
+                      value={settings?.site_name?.en || ''}
+                      onChange={(e) => setSettings({ ...settings, site_name: { ...settings.site_name, en: e.target.value } })}
+                      data-testid="site-name-en-input"
+                    />
+                  </div>
+                  <Button onClick={handleSocialSupportUpdate} data-testid="save-logo-sitename-btn">
+                    <Save className="w-4 h-4 mr-2" />
+                    Simpan Perubahan
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
             <Card>
               <CardHeader>
                 <CardTitle>Social Links (Ikuti ShinDoraNesub)</CardTitle>
