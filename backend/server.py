@@ -128,6 +128,7 @@ class SocialLink(BaseModel):
 
 class Settings(BaseModel):
     logo_url: str = ""
+    site_name: BilingualText = BilingualText(id="ShinDora Nesub", en="ShinDora Nesub")
     theme: Theme = Theme()
     social_links: List[SocialLink] = []
     support_links: List[SocialLink] = []
