@@ -1,0 +1,185 @@
+<analysis>**original_problem_statement:**
+The user wants to build a modern, full-stack video streaming website named ShinDora Nesub, with a UI/UX inspired by a YouTube 2025 concept.
+
+**PRODUCT REQUIREMENTS:**
+- **UI/UX:** Modern design with a flat left sidebar, minimalist header, large search bar, and modern video cards with soft shadows.
+- **Theming:** Light and dark modes, with the default following the user's system preference. The admin must be able to customize the primary theme colors (primary, dark background, light background, text).
+- **Bilingual (ID/EN):** The entire website UI, including all static text, video titles/descriptions, and category names, must be bilingual and switch automatically. Data should be structured to support this (e.g., ).
+- **Content:** Default categories are Doraemon, Crayon Shin-chan, etc. Videos are embedded via iframe.
+- **Pages:**
+    - **Home:** Main video gallery.
+    - **Video Player:** Large iframe player, bilingual title, views, Like/Save buttons, category/episode info, bilingual description, and a minimalist YouTube-style comment section with replies.
+    - **Autoplay:** YouTube-like autoplay mode with a large player, video info, Previous/Next buttons, and an Up Next list.
+    - **Static Pages:** Bilingual About Us, Disclaimer, Privacy Policy, Terms & Conditions.
+    - **Profile:** Users can change their username, avatar, and password.
+- **User System:** Custom JWT-based authentication (Register/Login). No Google Login.
+- **Admin Panel:** Accessible at  (password: ). Admin can perform CRUD operations on videos, categories, and ad text. Admin can also change the site logo and theme colors.
+- **Footer:** Must contain specified social and support links.
+
+**User's preferred language**: **Indonesian**. The next agent MUST respond in Indonesian.
+
+**what currently exists?**
+A full-stack application using FastAPI and React has been developed. The backend includes endpoints and MongoDB models for users, videos, categories, playlists, nested comments, ads, and site settings. It features a custom JWT authentication system, a password recovery flow without email, and a translation API using .
+
+The React frontend includes pages for home, video playback, user profiles, playlists, and a comprehensive admin panel. State is managed via React Context for authentication, theme, and language. The UI has undergone several iterations based on user feedback, particularly the sidebar and admin panel, which now features a tabbed interface with modal-based CRUD for all entities.
+
+**Last working item**:
+- **Last item agent was working:** The user requested the ability for the admin to change the website's logo and title/name from the admin panel's settings section. The agent acknowledged the request and was about to begin implementation.
+- **Status:** NOT STARTED
+- **Agent Testing Done:** N
+- **Which testing method agent to use?** both. The backend needs a new endpoint to save the logo/title, and the frontend needs UI updates in the admin panel and header.
+- **User Testing Done:** N
+
+**All Pending/In progress Issue list**:
+- **Issue 1 (P0):** Implement admin control for site logo and title.
+- **Issue 2 (P1):** The mobile responsive design is incomplete and does not match the user's specific visual requirements.
+- **Issue 3 (P2):** The multi-language feature was implemented with , but the user originally requested  and mentioned it again.
+
+**Issues Detail:**
+- **Issue 1: Implement admin control for site logo and title**
+    - **Attempted fixes:** None, work has not started.
+    - **Next debug checklist:**
+        1. **Backend ():**
+           - Modify the  model to include  (bilingual object) and  fields.
+           - Update the  (PUT) endpoint to handle updates for these new fields.
+           - Update the  (GET) endpoint to return them.
+        2. **Frontend ():**
+           - In the Settings tab, add input fields for the site name (ID/EN) and logo URL.
+           - Update the form submission logic to send the new data to the backend.
+        3. **Frontend ( & ):**
+           - Fetch the new settings and store them in the .
+           - Update the  component to display the dynamic logo and site name.
+    - **Why fix this issue and what will be achieved with the fix?** To fulfill the user's request for making the site branding customizable through the admin panel.
+    - **Status:** NOT STARTED
+    - **Is recurring issue?** N
+    - **Should Test frontend/backend/both after fix?** both
+    - **Blocked on other issue:** None
+
+- **Issue 2: Incomplete mobile responsive design**
+    - **Attempted fixes:** The agent previously added some responsive classes, but the user provided new screenshots indicating the layout is still not correct for mobile.
+    - **Next debug checklist:**
+        1. Review the user-provided images from message #322.
+        2. **Frontend (, , , ):** Apply responsive Tailwind CSS classes (, , , , , etc.) to rearrange, hide, or resize components to match the mobile layout in the screenshots. Pay close attention to the mobile sidebar/header behavior.
+    - **Why fix this issue and what will be achieved with the fix?** To ensure the website is usable and looks professional on mobile devices, as requested by the user.
+    - **Status:** IN PROGRESS
+    - **Is recurring issue?** Y
+    - **Should Test frontend/backend/both after fix?** frontend
+    - **Blocked on other issue:** None
+
+- **Issue 3: Incorrect translation service integration**
+    - **Attempted fixes:** The agent implemented  as an alternative.
+    - **Next debug checklist:**
+        1. Discuss with the user if a self-hosted LibreTranslate instance is available or if a public API should be used.
+        2. **Backend:**
+           - Install the required Python client for LibreTranslate.
+           - In , replace the  logic in the  endpoint with calls to the LibreTranslate API.
+    - **Why fix this issue and what will be achieved with the fix?** To align the implementation with the user's specific request for using LibreTranslate.
+    - **Status:** NOT STARTED
+    - **Is recurring issue?** Y
+    - **Should Test frontend/backend/both after fix?** backend
+    - **Blocked on other issue:** None
+
+**In progress Task List**:
+None other than the issues listed above.
+
+**Upcoming and Future Tasks**
+- **Upcoming Tasks:**
+    - **(P1) Implement LibreTranslate:** Replace the current Google Translate implementation as detailed in Pending Issues.
+- **Future Tasks:**
+    - **(P2) Refactor Monolithic Files:** Break down the large  and  files into smaller, more manageable modules/components to improve maintainability.
+    - **(P2) Full Testing of Admin Panel:** Perform comprehensive end-to-end testing of all CRUD operations (Add, Edit, Delete) for every entity in the rewritten Admin Panel UI.
+
+**Completed work in this session**
+- **User Authentication:** Custom JWT-based system for registration, login, and profile management (DONE).
+- **Forgot Password:** Implemented a password reset flow without email verification (DONE).
+- **Plaintext Password Viewing:** Implemented the user's request for admins to be able to view user passwords (DONE).
+- **Content Management:** Full CRUD functionality for videos, categories, pages, ads, and social/support links via the Admin Panel (DONE).
+- **Playlist System:** Users can create playlists, add videos to them, and watch them in an autoplay mode (DONE).
+- **Nested Comments:** Video comment section supports direct replies to other comments (DONE).
+- **Dynamic Theming:** Admin can customize the site's color theme (DONE).
+- **Auto-Translation:** Integrated a translation API to support over 20 languages, with a language selector in the header (DONE, but with wrong service).
+- **UI/UX:** Rewrote the Admin Panel with a tabbed, modal-based UI for improved usability. Iterated on the sidebar category display based on user feedback (DONE).
+
+**Earlier issues found/mentioned but not fixed**
+- The user requested  for translation, but the agent implemented  instead. The user brought this up again, but it has not been addressed. This is captured in the **All Pending/In progress Issue list**.
+
+**Known issue recurrence from previous fork**
+- N/A
+
+**Code Architecture**
+
+
+**Key Technical Concepts**
+- **Backend:** FastAPI, Pydantic, Motor (async MongoDB driver), JWT.
+- **Frontend:** React, React Router, React Context API, Tailwind CSS, Axios.
+- **Database:** MongoDB.
+- **Authentication:** Custom JWT-based token authentication.
+- **Deployment:** Docker container with Supervisor managing backend/frontend processes.
+
+**key DB schema**
+- **users:** 
+- **videos:** 
+- **categories:** 
+- **comments:** 
+- **playlists:** 
+- **settings:** Single document 
+- **pages:** 
+- **ads:** 
+
+**changes in tech stack**
+-  was added to the backend for translation.
+
+**All files**
+- : The single source of truth for the entire backend logic, including all API routes, database models, and business logic.
+- : A large, monolithic component containing the entire UI and logic for all admin management tasks (videos, users, categories, settings, etc.).
+- : The , , and  files are critical for managing global application state.
+- : Contains the main application routing structure.
+- : Manages top-level navigation, search, theme/language switching, and user authentication state display.
+- : Contains the main navigation menu, which has been modified multiple times.
+
+**Areas that need refactoring**:
+- ****: This file is over 700 lines long and contains all models, routes, and logic. It should be broken down into a structured FastAPI project (e.g., separate directories for , , , ).
+- ****: This React component is extremely large and complex. The logic and UI for each admin tab (Videos, Users, Categories, Settings, etc.) should be extracted into its own child component to simplify  into a tab container.
+
+**key api endpoints**
+- , , 
+- : A full suite of RESTful endpoints for CRUD operations on all data models.
+- , , 
+- 
+- 
+
+**Critical Info for New Agent**
+- **Plaintext Password Storage**: The user explicitly insisted that admins be able to view user passwords. The current implementation stores passwords in plaintext () in the  collection alongside the hash. **This is a critical security vulnerability**. The agent should be aware of this implementation detail and handle it with care.
+- **Admin Password**: The password for the  panel is hardcoded in the backend to ****.
+- **Monolithic Files**: Be prepared to work with very large files (, ). Changes may be complex to trace.
+
+**documents created in this job**
+- None.
+
+**Last 5 User Messages and any pending user messages**
+1. **User (Msg 325):** Requested the ability for the admin to change the site logo and name in settings. **(Pending - Current Task)**
+2. **User (Msg 322):** Provided screenshots for a better mobile responsive layout. **(In Progress)**
+3. **User (Msg 319):** Stated that the site must be responsive for mobile and desktop. **(In Progress)**
+4. **User (Msg 290):** Requested a Forgot Password feature and editable display names for users. **(Completed)**
+5. **User (Msg 265):** Requested multi-language support using LibreTranslate or Google Translate. **(Completed with Google Translate; LibreTranslate part is pending)**
+
+**Project Health Check:**
+- **Broken:** The mobile responsive layout is incomplete and does not meet user requirements.
+- **Mocked:** None.
+
+**Testing status**
+- **Testing agent used after significant changes:** NO
+- **Troubleshoot agent used after agent stuck in loop:** NO
+- **Test files created:** None
+- **Known regressions:** None identified.
+
+**Credentials to test flow:**
+- **Admin Access:**
+  - URL: 
+  - Password: 
+- **Standard User:**
+  - Register a new user through the UI. The last test user created was  / .
+
+**What agent forgot to execute**
+- The agent did not implement the user's request for **LibreTranslate**, opting for  instead, and has not yet corrected this despite the user asking again.
+- The agent started but did not fully complete the mobile responsive design according to the user's specific visual instructions.</analysis>
