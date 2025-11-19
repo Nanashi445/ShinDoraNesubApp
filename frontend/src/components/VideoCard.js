@@ -60,14 +60,14 @@ const VideoCard = ({ video, onLike, onWatchLater, isLiked, isInWatchLater }) => 
         />
         <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300" />
       </div>
-      <CardContent className="p-4 space-y-2">
-        <h3 className="font-semibold text-base line-clamp-2" data-testid="video-title">
+      <CardContent className="p-3 sm:p-4 space-y-2">
+        <h3 className="font-semibold text-sm sm:text-base line-clamp-2" data-testid="video-title">
           {t(video.title)}
         </h3>
-        <div className="flex items-center justify-between text-sm text-gray-500">
-          <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between text-xs sm:text-sm text-gray-500">
+          <div className="flex items-center gap-2 sm:gap-4">
             <span className="flex items-center gap-1" data-testid="video-views">
-              <Eye className="w-4 h-4" />
+              <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
               {video.views} {t(translate.views)}
             </span>
             <span className="text-xs" data-testid="video-category">{t(video.category)}</span>
@@ -78,7 +78,7 @@ const VideoCard = ({ video, onLike, onWatchLater, isLiked, isInWatchLater }) => 
             {t(translate.episode)} {video.episode}
           </div>
         )}
-        <div className="flex gap-2 pt-2">
+        <div className="flex gap-1 sm:gap-2 pt-2">
           <Button
             size="sm"
             variant={isLiked ? 'default' : 'outline'}
