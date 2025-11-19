@@ -88,12 +88,12 @@ const Header = ({ onMenuClick }) => {
             </Button>
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')} data-testid="logo-link">
               {settings?.logo_url ? (
-                <img src={settings.logo_url} alt="ShinDora Nesub" className="h-8 w-8" />
+                <img src={settings.logo_url} alt="ShinDora Nesub" className="h-8 w-8 object-contain" />
               ) : (
                 <div className="h-8 w-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg" />
               )}
               <h1 className="text-xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
-                ShinDora Nesub
+                {settings?.site_name?.[language] || 'ShinDora Nesub'}
               </h1>
             </div>
           </div>
