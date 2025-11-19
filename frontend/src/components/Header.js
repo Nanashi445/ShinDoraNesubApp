@@ -81,25 +81,25 @@ const Header = ({ onMenuClick }) => {
   return (
     <>
       <header className="fixed top-0 left-0 right-0 z-50 glass border-b border-gray-800" data-testid="main-header">
-        <div className="flex items-center justify-between px-6 py-3">
-          <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between px-3 sm:px-6 py-3">
+          <div className="flex items-center gap-2 sm:gap-4">
             <Button variant="ghost" size="icon" onClick={onMenuClick} data-testid="menu-toggle-btn">
               <Menu className="w-5 h-5" />
             </Button>
-            <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')} data-testid="logo-link">
+            <div className="flex items-center gap-1 sm:gap-2 cursor-pointer" onClick={() => navigate('/')} data-testid="logo-link">
               {settings?.logo_url ? (
-                <img src={settings.logo_url} alt="ShinDora Nesub" className="h-8 w-8 object-contain" />
+                <img src={settings.logo_url} alt="ShinDora Nesub" className="h-6 sm:h-8 w-6 sm:w-8 object-contain" />
               ) : (
-                <div className="h-8 w-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg" />
+                <div className="h-6 sm:h-8 w-6 sm:w-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg" />
               )}
-              <h1 className="text-xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+              <h1 className="text-sm sm:text-xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent hidden sm:block" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
                 {settings?.site_name?.[language] || 'ShinDora Nesub'}
               </h1>
             </div>
           </div>
 
-          <form onSubmit={handleSearch} className="flex-1 max-w-2xl mx-6" data-testid="search-form">
-            <div className="relative">
+          <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-2xl mx-6" data-testid="search-form">
+            <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <Input
                 type="text"
@@ -112,7 +112,7 @@ const Header = ({ onMenuClick }) => {
             </div>
           </form>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 sm:gap-3">
             <Button variant="ghost" size="icon" onClick={toggleTheme} data-testid="theme-toggle-btn">
               {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </Button>
