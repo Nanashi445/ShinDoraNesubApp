@@ -39,15 +39,24 @@ const Sidebar = ({ isOpen, onClose }) => {
   const isActive = (path) => location.pathname === path || location.search === path.split('?')[1];
 
   return (
-    <aside
-      className={`fixed left-0 top-16 h-[calc(100vh-4rem)] bg-opacity-95 backdrop-blur-sm border-r border-gray-800 transition-transform duration-300 z-40 ${
-        isOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}
-      style={{ width: '16rem' }}
-      data-testid="sidebar"
-    >
-      <ScrollArea className="h-full">
-        <div className="p-4 space-y-2">
+    <>
+      {/* Overlay for mobile */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden" 
+          onClick={onClose}
+          data-testid="sidebar-overlay"
+        />
+      )}
+      
+      <aside
+        className={`fixed left-0 top-16 h-[calc(100vh-4rem)] bg-gray-900 bg-opacity-95 backdrop-blur-sm border-r border-gray-800 transition-transform duration-300 z-40 ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        } w-64 lg:w-64`}
+        data-testid="sidebar"
+      >
+        <ScrollArea className="h-full">
+          <div className="p-4 space-y-2">
           {menuItems.map((item) => (
             <Button
               key={item.path}
