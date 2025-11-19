@@ -90,6 +90,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         </div>
       </ScrollArea>
     </aside>
+    </>
   );
 };
 
