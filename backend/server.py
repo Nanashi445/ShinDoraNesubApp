@@ -538,20 +538,28 @@ class TranslateRequest(BaseModel):
 @api_router.post("/translate")
 async def translate_text(data: TranslateRequest):
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=30.0) as client:
             # LibreTranslate API endpoint
             url = f"{LIBRETRANSLATE_API_URL}/translate"
             
             # Detect language if source is auto
             source_lang = data.source_lang
             if source_lang == "auto":
+                detect_payload = {"q": data.text}
+                if LIBRETRANSLATE_API_KEY:
+                    detect_payload["api_key"] = LIBRETRANSLATE_API_KEY
+                    
                 detect_response = await client.post(
                     f"{LIBRETRANSLATE_API_URL}/detect",
-                    json={"q": data.text}
+                    json=detect_payload
                 )
-                detect_data = detect_response.json()
-                if detect_data and len(detect_data) > 0:
-                    source_lang = detect_data[0]["language"]
+                
+                if detect_response.status_code == 200:
+                    detect_data = detect_response.json()
+                    if detect_data and len(detect_data) > 0:
+                        source_lang = detect_data[0]["language"]
+                    else:
+                        source_lang = "en"
                 else:
                     source_lang = "en"
             
@@ -563,7 +571,19 @@ async def translate_text(data: TranslateRequest):
                 "format": "text"
             }
             
+            # Add API key if available
+            if LIBRETRANSLATE_API_KEY:
+                payload["api_key"] = LIBRETRANSLATE_API_KEY
+            
             response = await client.post(url, json=payload)
+            
+            # Handle API key requirement
+            if response.status_code == 403 or (response.status_code == 200 and "error" in response.json()):
+                raise HTTPException(
+                    status_code=503, 
+                    detail="LibreTranslate API key required. Please set LIBRETRANSLATE_API_KEY in backend/.env or use a self-hosted instance."
+                )
+            
             response.raise_for_status()
             result = response.json()
             
@@ -572,6 +592,8 @@ async def translate_text(data: TranslateRequest):
                 "source_lang": source_lang,
                 "target_lang": data.target_lang
             }
+    except HTTPException:
+        raise
     except httpx.HTTPError as e:
         raise HTTPException(status_code=500, detail=f"Translation service error: {str(e)}")
     except Exception as e:
