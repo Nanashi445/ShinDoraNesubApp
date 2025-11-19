@@ -12,7 +12,7 @@ const Layout = () => {
       <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
       <div className="flex flex-1 pt-16">
         <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-        <main className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'lg:ml-64' : 'ml-0'} p-4 md:p-6`}>
+        <main className="flex-1 w-full p-3 sm:p-4 md:p-6">
           <Outlet />
         </main>
       </div>
