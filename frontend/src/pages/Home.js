@@ -123,7 +123,7 @@ const Home = () => {
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
           {[...Array(8)].map((_, i) => (
             <div key={i} className="animate-pulse">
               <div className="aspect-video bg-gray-700 rounded-lg" />
@@ -134,12 +134,12 @@ const Home = () => {
         </div>
       ) : videos.length === 0 ? (
         <div className="text-center py-12" data-testid="no-videos-message">
-          <p className="text-gray-500">
+          <p className="text-gray-500 text-sm sm:text-base">
             {t({ id: 'Tidak ada video ditemukan', en: 'No videos found' })}
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" data-testid="video-grid">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6" data-testid="video-grid">
           {videos.map((video) => (
             <VideoCard
               key={video.id}
