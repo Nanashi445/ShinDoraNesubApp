@@ -537,8 +537,42 @@ class TranslateRequest(BaseModel):
 @api_router.post("/translate")
 async def translate_text(data: TranslateRequest):
     try:
-        result = translator.translate(data.text, src=data.source_lang, dest=data.target_lang)
-        return {"translated_text": result.text, "source_lang": result.src, "target_lang": data.target_lang}
+        async with httpx.AsyncClient() as client:
+            # LibreTranslate API endpoint
+            url = f"{LIBRETRANSLATE_API_URL}/translate"
+            
+            # Detect language if source is auto
+            source_lang = data.source_lang
+            if source_lang == "auto":
+                detect_response = await client.post(
+                    f"{LIBRETRANSLATE_API_URL}/detect",
+                    json={"q": data.text}
+                )
+                detect_data = detect_response.json()
+                if detect_data and len(detect_data) > 0:
+                    source_lang = detect_data[0]["language"]
+                else:
+                    source_lang = "en"
+            
+            # Translate text
+            payload = {
+                "q": data.text,
+                "source": source_lang,
+                "target": data.target_lang,
+                "format": "text"
+            }
+            
+            response = await client.post(url, json=payload)
+            response.raise_for_status()
+            result = response.json()
+            
+            return {
+                "translated_text": result.get("translatedText", data.text),
+                "source_lang": source_lang,
+                "target_lang": data.target_lang
+            }
+    except httpx.HTTPError as e:
+        raise HTTPException(status_code=500, detail=f"Translation service error: {str(e)}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
