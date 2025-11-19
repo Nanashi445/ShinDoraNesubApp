@@ -101,10 +101,10 @@ const Home = () => {
   };
 
   return (
-    <div className="space-y-6 fade-in" data-testid="home-page">
+    <div className="space-y-4 sm:space-y-6 fade-in" data-testid="home-page">
       <AdBanner position="home_top" />
       
-      <div className="flex gap-2 overflow-x-auto pb-2" data-testid="category-tabs">
+      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide" data-testid="category-tabs">
         {categories.map((cat) => (
           <Button
             key={cat.id}
@@ -113,7 +113,8 @@ const Home = () => {
               setSelectedCategory(t(cat.name));
               window.location.href = `/?category=${encodeURIComponent(t(cat.name))}`;
             }}
-            className="whitespace-nowrap"
+            className="whitespace-nowrap text-sm sm:text-base"
+            size="sm"
             data-testid={`category-tab-${cat.id}`}
           >
             {t(cat.name)}
